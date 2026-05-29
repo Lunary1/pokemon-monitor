@@ -1,0 +1,26 @@
+{
+  "name": "@pokemon-monitor/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "echo No Next.js app files to build yet",
+    "start": "next start",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "echo No source files to typecheck yet"
+  },
+  "dependencies": {
+    "@pokemon-monitor/core": "workspace:*",
+    "@pokemon-monitor/db": "workspace:*",
+    "@pokemon-monitor/notifications": "workspace:*",
+    "@pokemon-monitor/playwright-helper": "workspace:*",
+    "@pokemon-monitor/store-adapters": "workspace:*",
+    "next": "^14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1"
+  }
+}

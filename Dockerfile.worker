@@ -1,0 +1,13 @@
+FROM node:22-slim AS base
+WORKDIR /app
+RUN corepack enable
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY workers/monitor/package.json workers/monitor/package.json
+COPY packages packages
+RUN pnpm install --frozen-lockfile
+
+FROM deps AS runner
+COPY . .
+CMD ["pnpm", "--filter", "@pokemon-monitor/monitor-worker", "start"]
