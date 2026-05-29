@@ -1,3 +1,5 @@
+export { ToyChampAdapter } from './adapters/toychamp';
+
 export type {
   AdapterConfig,
   CheckOptions,
