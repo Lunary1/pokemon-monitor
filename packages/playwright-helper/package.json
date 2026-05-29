@@ -10,7 +10,7 @@
     "typecheck": "echo No source files to typecheck yet"
   },
   "dependencies": {
-    "@pokemon-monitor/core": "workspace:*",
+    "@pokemon-monitor/core": "0.1.0",
     "playwright": "^1.49.1"
   }
 }

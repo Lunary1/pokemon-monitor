@@ -10,8 +10,8 @@
     "typecheck": "echo No source files to typecheck yet"
   },
   "dependencies": {
-    "@pokemon-monitor/core": "workspace:*",
-    "@pokemon-monitor/db": "workspace:*",
+    "@pokemon-monitor/core": "0.1.0",
+    "@pokemon-monitor/db": "0.1.0",
     "got": "^14.4.5"
   }
 }

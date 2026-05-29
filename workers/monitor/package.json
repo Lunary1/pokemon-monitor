@@ -5,17 +5,17 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "echo No monitor worker entrypoint yet",
     "build": "echo No source files to build yet",
-    "start": "tsx src/index.ts",
+    "start": "echo No monitor worker entrypoint yet",
     "test": "vitest run --passWithNoTests",
     "typecheck": "echo No source files to typecheck yet"
   },
   "dependencies": {
-    "@pokemon-monitor/core": "workspace:*",
-    "@pokemon-monitor/db": "workspace:*",
-    "@pokemon-monitor/notifications": "workspace:*",
-    "@pokemon-monitor/store-adapters": "workspace:*",
+    "@pokemon-monitor/core": "0.1.0",
+    "@pokemon-monitor/db": "0.1.0",
+    "@pokemon-monitor/notifications": "0.1.0",
+    "@pokemon-monitor/store-adapters": "0.1.0",
     "node-cron": "^3.0.3"
   },
   "devDependencies": {

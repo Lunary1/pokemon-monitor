@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pokemon-monitor/core": "workspace:*",
+    "@pokemon-monitor/core": "0.1.0",
     "cheerio": "^1.0.0",
     "got": "^14.4.5"
   },

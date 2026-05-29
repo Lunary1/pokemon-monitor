@@ -2,19 +2,24 @@
   "name": "pokemon-monitor",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.23.0",
+  "packageManager": "npm@10.9.7",
   "description": "Personal-use Pokemon TCG stock monitor for EU stores.",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "db:generate": "pnpm --filter @pokemon-monitor/db db:generate",
-    "db:migrate": "pnpm --filter @pokemon-monitor/db db:migrate"
+    "db:generate": "npm run db:generate --workspace @pokemon-monitor/db",
+    "db:migrate": "npm run db:migrate --workspace @pokemon-monitor/db"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "workers/*"
+  ],
   "engines": {
     "node": ">=20.11.0",
-    "pnpm": ">=10.0.0"
+    "npm": ">=10.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
