@@ -1,0 +1,62 @@
+name: Incident
+description: A production incident - worker down, notification storm, adapter silently broken, missed restock. Feeds docs/SDLC.md Section 4/9.
+title: "incident: "
+labels:
+  - incident
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+
+  - type: dropdown
+    id: detected-by
+    attributes:
+      label: Detected by
+      options:
+        - UptimeRobot alert
+        - Discord silence noticed
+        - Manual check
+        - Other (describe in "What happened")
+    validations:
+      required: true
+
+  - type: input
+    id: duration
+    attributes:
+      label: Duration
+      description: How long was it down/broken, or is it still ongoing?
+      placeholder: "e.g. ~45 minutes, or ongoing"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Missed restock
+        - Downtime
+        - Data issue
+        - False-positive spam
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-log-context
+    attributes:
+      label: ErrorLog / StockCheck context
+      description: Link or paste the relevant ErrorLog rows, source/level/context fields, or recent StockCheck history that shows the failure.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: postmortem
+    attributes:
+      label: Postmortem
+      description: docs/SDLC.md Section 4 - required for any incident causing a missed restock, >1h downtime, or data loss.
+      options:
+        - label: This incident meets the postmortem bar (missed restock, >1h downtime, or data loss) and a postmortem will be filed in docs/incidents/.
+          required: false
