@@ -1,4 +1,4 @@
-import { logger } from '@pokemon-monitor/core';
+import { logger, throttleDomain } from '@pokemon-monitor/core';
 import { prisma, type StockEvent } from '@pokemon-monitor/db';
 import { getAdapter } from '@pokemon-monitor/store-adapters';
 import { detectTransition, isErrorResult } from './transitions';
@@ -42,6 +42,10 @@ export async function runCheckCycle(
         : 0;
       if (Date.now() < dueAt) continue;
 
+      await throttleDomain(
+        new URL(adapter.config.baseUrl).hostname,
+        adapter.config.minIntervalMs,
+      );
       const result = await adapter.checkProduct(product.url);
 
       const stockCheck = await prisma.stockCheck.create({

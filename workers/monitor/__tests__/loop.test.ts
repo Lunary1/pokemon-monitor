@@ -20,13 +20,18 @@ vi.mock('@pokemon-monitor/db', () => ({
 
 vi.mock('@pokemon-monitor/core', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  throttleDomain: vi.fn().mockResolvedValue(undefined),
 }));
 
 const checkProduct = vi.fn();
 vi.mock('@pokemon-monitor/store-adapters', () => ({
-  getAdapter: vi.fn(() => ({ checkProduct })),
+  getAdapter: vi.fn(() => ({
+    checkProduct,
+    config: { baseUrl: 'https://www.toychamp.be', minIntervalMs: 5_000 },
+  })),
 }));
 
+import { throttleDomain } from '@pokemon-monitor/core';
 import { runCheckCycle } from '../src/loop';
 
 const baseStore = {
@@ -62,6 +67,7 @@ describe('runCheckCycle', () => {
 
     expect(createStockCheck).toHaveBeenCalledTimes(1);
     expect(createStockEvent).not.toHaveBeenCalled();
+    expect(throttleDomain).toHaveBeenCalledWith('www.toychamp.be', 5_000);
   });
 
   test('writes a RESTOCK event on false -> true transition', async () => {
