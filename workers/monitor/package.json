@@ -16,7 +16,7 @@
     "@pokemon-monitor/db": "0.1.0",
     "@pokemon-monitor/notifications": "0.1.0",
     "@pokemon-monitor/store-adapters": "0.1.0",
-    "node-cron": "^3.0.3"
+    "node-cron": "^4.6.0"
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.11",
