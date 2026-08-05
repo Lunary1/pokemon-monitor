@@ -15,6 +15,9 @@ coverage/
 apps/*/AGENTS.md
 apps/*/CLAUDE.md
 
+# Next.js codegen — content flips between `next dev` and `next build` output
+apps/*/next-env.d.ts
+
 # TypeScript
 *.tsbuildinfo
 
