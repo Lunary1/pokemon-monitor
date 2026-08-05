@@ -18,6 +18,10 @@ describe('ToyChampAdapter', () => {
     nock.disableNetConnect();
   });
 
+  test('CI validation: deliberately failing test', () => {
+    expect(true).toBe(false);
+  });
+
   afterEach(() => {
     nock.cleanAll();
   });
