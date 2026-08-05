@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Stores
+
+model Store {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  name            String
+  baseUrl         String
+  adapterKey      String
+  enabled         Boolean  @default(true)
+  pollingInterval Int      @default(300)
+  minIntervalMs   Int      @default(10000)
+  customHeaders   Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  products      Product[]
+  adapterConfig AdapterConfig?
+}
+
+model AdapterConfig {
+  id      String @id @default(cuid())
+  storeId String @unique
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  config  Json
+}
+
+// Products
+
+model Product {
+  id              String   @id @default(cuid())
+  storeId         String
+  store           Store    @relation(fields: [storeId], references: [id])
+  name            String
+  url             String
+  imageUrl        String?
+  tags            String[] @default([])
+  enabled         Boolean  @default(true)
+  trackPrice      Boolean  @default(true)
+  notifyOnRestock Boolean  @default(true)
+  notifyOnDrop    Boolean  @default(false)
+  priceDrop       Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  checks        StockCheck[]
+  events        StockEvent[]
+  notifications Notification[]
+
+  @@unique([storeId, url])
+}
+
+// Stock Checks (raw log of every poll)
+
+model StockCheck {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  inStock      Boolean
+  price        Float?
+  currency     String   @default("EUR")
+  availability String?
+  httpStatus   Int?
+  durationMs   Int?
+  error        String?
+  checkedAt    DateTime @default(now())
+
+  @@index([productId, checkedAt(sort: Desc)])
+}
+
+// Stock Events (transitions only)
+
+model StockEvent {
+  id            String         @id @default(cuid())
+  productId     String
+  product       Product        @relation(fields: [productId], references: [id])
+  eventType     StockEventType
+  previousPrice Float?
+  currentPrice  Float?
+  occurredAt    DateTime       @default(now())
+
+  notifications Notification[]
+}
+
+enum StockEventType {
+  RESTOCK
+  OUT_OF_STOCK
+  PRICE_DROP
+  PRICE_INCREASE
+  ADAPTER_ERROR
+}
+
+// Notifications
+
+model Notification {
+  id        String             @id @default(cuid())
+  productId String?
+  product   Product?           @relation(fields: [productId], references: [id])
+  eventId   String?
+  event     StockEvent?        @relation(fields: [eventId], references: [id])
+  channel   NotificationChannel
+  status    NotificationStatus @default(PENDING)
+  payload   Json
+  sentAt    DateTime?
+  error     String?
+  createdAt DateTime           @default(now())
+}
+
+enum NotificationChannel {
+  DISCORD
+  TELEGRAM
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+// User Settings
+
+model Setting {
+  id                   String   @id @default(cuid())
+  discordWebhookUrl    String?
+  telegramBotToken     String?
+  telegramChatId       String?
+  emailAddress         String?
+  notificationsEnabled Boolean  @default(true)
+  defaultCooldownSecs  Int      @default(3600)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+// Error Log
+
+model ErrorLog {
+  id         String   @id @default(cuid())
+  source     String
+  level      LogLevel @default(ERROR)
+  message    String
+  stack      String?
+  context    Json?
+  occurredAt DateTime @default(now())
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+}
