@@ -1,0 +1,65 @@
+name: Bug report
+description: Something is broken - an adapter, the worker loop, the dashboard, notifications, or the database.
+title: "fix: "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected component
+      options:
+        - adapter
+        - worker
+        - dashboard
+        - notifications
+        - db
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro-steps
+    attributes:
+      label: Repro steps
+      description: Exact steps to reproduce - store/product URL if adapter-related, or the worker/dashboard action taken.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include any relevant ErrorLog entry, log output, or screenshot.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: XS <1h, S <1 day, M spans files/1 package, L spans packages or schema. Apply the matching size/* label after creating the issue.
+      options:
+        - XS - Trivial, <1h
+        - S - Small, <1 day
+        - M - Medium, spans files/1 package
+        - L - Large, spans packages or schema
+    validations:
+      required: true
+
+  - type: dropdown
+    id: moscow
+    attributes:
+      label: MoSCoW priority
+      options:
+        - Must-Have (MVP)
+        - Should-Have
+        - Could-Have
+    validations:
+      required: true
