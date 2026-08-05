@@ -5,6 +5,7 @@
   "packageManager": "npm@10.9.7",
   "description": "Personal-use Pokemon TCG stock monitor for EU stores.",
   "scripts": {
+    "postinstall": "npm run db:generate --workspace @pokemon-monitor/db",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",

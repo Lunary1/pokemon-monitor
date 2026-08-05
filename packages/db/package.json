@@ -5,11 +5,11 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "build": "echo No source files to build yet",
+    "build": "prisma generate && tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "echo No source files to typecheck yet"
+    "typecheck": "prisma generate && tsc --noEmit"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0"
