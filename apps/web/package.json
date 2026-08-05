@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "echo No Next.js app files to build yet",
+    "build": "next build",
     "start": "next start",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "echo No source files to typecheck yet"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@pokemon-monitor/core": "0.1.0",
