@@ -7,7 +7,9 @@
     "build": "dotenv -e ../../.env -- next build",
     "start": "dotenv -e ../../.env -- next start",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "e2e": "dotenv -e ../../.env -- playwright test",
+    "e2e:seed": "dotenv -e ../../.env -- tsx e2e/seed.ts"
   },
   "dependencies": {
     "@pokemon-monitor/core": "0.1.0",
@@ -20,7 +22,9 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1"
+    "@types/react-dom": "^18.3.1",
+    "tsx": "^4.19.2"
   }
 }

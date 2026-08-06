@@ -18,6 +18,8 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 
   return (
     <div
+      data-testid="product-card"
+      data-product-id={product.id}
       style={{
         display: 'flex',
         justifyContent: 'space-between',
