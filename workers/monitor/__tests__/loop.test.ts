@@ -21,6 +21,12 @@ vi.mock('@pokemon-monitor/db', () => ({
 vi.mock('@pokemon-monitor/core', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   throttleDomain: vi.fn().mockResolvedValue(undefined),
+  isErrorResult: (availability: string | null | undefined) =>
+    typeof availability === 'string' && availability.startsWith('ERROR:'),
+  detectTransition: (previous: boolean | null, current: boolean) => {
+    if (previous === null || previous === current) return null;
+    return current ? 'RESTOCK' : 'OUT_OF_STOCK';
+  },
 }));
 
 const checkProduct = vi.fn();

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@pokemon-monitor/db": "0.1.0",
     "pino": "^9.5.0"
   }
 }

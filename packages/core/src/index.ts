@@ -5,3 +5,4 @@ export const logger = pino({
 });
 
 export { throttleDomain, resetThrottleState } from './throttle';
+export { isErrorResult, detectTransition } from './transitions';
