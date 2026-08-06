@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "@pokemon-monitor/db": "0.1.0",
-    "pino": "^9.5.0"
+    "pino": "^10.3.1"
   }
 }
