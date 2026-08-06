@@ -23,9 +23,12 @@ vi.mock('@pokemon-monitor/store-adapters', () => ({
   getAdapter: (...args: unknown[]) => getAdapter(...args),
 }));
 
+const isUrlAllowed = vi.fn();
+
 vi.mock('@pokemon-monitor/core', () => ({
   logger: { info: vi.fn(), warn: vi.fn() },
   throttleDomain: (...args: unknown[]) => throttleDomain(...args),
+  isUrlAllowed: (...args: unknown[]) => isUrlAllowed(...args),
   isErrorResult: (availability: string | null | undefined) =>
     typeof availability === 'string' && availability.startsWith('ERROR:'),
   detectTransition: (previous: boolean | null, current: boolean) => {
@@ -39,7 +42,12 @@ import { POST } from '../app/api/products/[id]/check/route';
 const product = {
   id: 'product-1',
   url: 'https://www.toychamp.be/pokemon-sv-booster-box',
-  store: { id: 'store-1', key: 'toychamp', adapterKey: 'toychamp' },
+  store: {
+    id: 'store-1',
+    key: 'toychamp',
+    adapterKey: 'toychamp',
+    ignoreRobotsTxt: false,
+  },
 };
 
 const adapter = {
@@ -58,6 +66,7 @@ beforeEach(() => {
   findUniqueProduct.mockResolvedValue(product);
   getAdapter.mockReturnValue(adapter);
   throttleDomain.mockResolvedValue(undefined);
+  isUrlAllowed.mockResolvedValue(true);
 });
 
 describe('POST /api/products/:id/check', () => {
@@ -154,5 +163,50 @@ describe('POST /api/products/:id/check', () => {
 
     expect(response.status).toBe(422);
     expect(checkProduct).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/products/:id/check — robots.txt gate (#29)', () => {
+  test('returns 403 and does not fetch when robots.txt disallows the URL', async () => {
+    // A manual "Check now" must not be an escape hatch around compliance.
+    isUrlAllowed.mockResolvedValue(false);
+
+    const response = await makeRequest('product-1');
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body.error).toContain('robots.txt');
+    expect(checkProduct).not.toHaveBeenCalled();
+    expect(createStockCheck).not.toHaveBeenCalled();
+  });
+
+  test('does not consume the domain rate budget when refused', async () => {
+    isUrlAllowed.mockResolvedValue(false);
+
+    await makeRequest('product-1');
+
+    expect(throttleDomain).not.toHaveBeenCalled();
+  });
+
+  test('ignoreRobotsTxt bypasses the gate', async () => {
+    findUniqueProduct.mockResolvedValue({
+      ...product,
+      store: { ...product.store, ignoreRobotsTxt: true },
+    });
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue({
+      inStock: true,
+      price: 10,
+      currency: 'EUR',
+      availability: 'In stock',
+      checkedAt: new Date(),
+    });
+    createStockCheck.mockResolvedValue({ id: 'check-1', inStock: true });
+
+    const response = await makeRequest('product-1');
+
+    expect(response.status).toBe(200);
+    expect(isUrlAllowed).not.toHaveBeenCalled();
+    expect(checkProduct).toHaveBeenCalled();
   });
 });

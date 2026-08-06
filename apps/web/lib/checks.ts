@@ -1,4 +1,10 @@
-import { detectTransition, isErrorResult, logger, throttleDomain } from '@pokemon-monitor/core';
+import {
+  detectTransition,
+  isErrorResult,
+  isUrlAllowed,
+  logger,
+  throttleDomain,
+} from '@pokemon-monitor/core';
 import { prisma, type StockCheck } from '@pokemon-monitor/db';
 import { getAdapter } from '@pokemon-monitor/store-adapters';
 
@@ -16,6 +22,13 @@ export class AdapterNotFoundError extends Error {
   }
 }
 
+export class RobotsDisallowedError extends Error {
+  constructor(url: string) {
+    super(`robots.txt disallows fetching: ${url}`);
+    this.name = 'RobotsDisallowedError';
+  }
+}
+
 export async function runManualCheck(productId: string): Promise<StockCheck> {
   const product = await prisma.product.findUnique({
     where: { id: productId },
@@ -25,6 +38,22 @@ export async function runManualCheck(productId: string): Promise<StockCheck> {
 
   const adapter = getAdapter(product.store.adapterKey);
   if (!adapter) throw new AdapterNotFoundError(product.store.adapterKey);
+
+  // robots.txt gate (SDLC §7). A manual "Check now" must not bypass
+  // compliance — checked before throttling so a refused product doesn't
+  // consume the domain's rate budget.
+  if (product.store.ignoreRobotsTxt) {
+    logger.warn(
+      { storeKey: product.store.key, productId: product.id },
+      'robots.txt check bypassed by store configuration',
+    );
+  } else if (!(await isUrlAllowed(product.url))) {
+    logger.warn(
+      { storeKey: product.store.key, productId: product.id, url: product.url },
+      'robots.txt disallows this URL, refusing manual check',
+    );
+    throw new RobotsDisallowedError(product.url);
+  }
 
   const lastCheck = await prisma.stockCheck.findFirst({
     where: { productId: product.id },

@@ -18,6 +18,9 @@ model Store {
   enabled         Boolean  @default(true)
   pollingInterval Int      @default(300)
   minIntervalMs   Int      @default(10000)
+  // Opt out of robots.txt enforcement for this store. Per docs/SDLC.md §7 this
+  // must be set explicitly and knowingly; every bypass is logged at WARN.
+  ignoreRobotsTxt Boolean  @default(false)
   customHeaders   Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

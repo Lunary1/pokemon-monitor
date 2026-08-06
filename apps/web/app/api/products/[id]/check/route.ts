@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { AdapterNotFoundError, ProductNotFoundError, runManualCheck } from '../../../../../lib/checks';
+import {
+  AdapterNotFoundError,
+  ProductNotFoundError,
+  RobotsDisallowedError,
+  runManualCheck,
+} from '../../../../../lib/checks';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +20,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     }
     if (error instanceof AdapterNotFoundError) {
       return NextResponse.json({ error: error.message }, { status: 422 });
+    }
+    if (error instanceof RobotsDisallowedError) {
+      // 403: we are refusing on the target site's behalf, not failing.
+      return NextResponse.json({ error: error.message }, { status: 403 });
     }
     throw error;
   }
