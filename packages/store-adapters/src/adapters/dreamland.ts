@@ -52,7 +52,7 @@ export class DreamlandAdapter implements StoreAdapter {
         headers: {
           'User-Agent':
             options?.userAgent ?? 'Mozilla/5.0 (personal stock monitor)',
-          ...this.config.customHeaders,
+          ...(options?.customHeaders ?? this.config.customHeaders),
         },
         followRedirect: true,
       });

@@ -19,9 +19,15 @@ vi.mock('@pokemon-monitor/db', () => ({
   },
 }));
 
-vi.mock('@pokemon-monitor/store-adapters', () => ({
-  getAdapter: (...args: unknown[]) => getAdapter(...args),
-}));
+// Keep the real resolveAdapterConfig so the override plumbing is exercised;
+// only the registry lookup is mocked.
+vi.mock('@pokemon-monitor/store-adapters', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@pokemon-monitor/store-adapters')>();
+  return {
+    ...actual,
+    getAdapter: (...args: unknown[]) => getAdapter(...args),
+  };
+});
 
 const isUrlAllowed = vi.fn();
 
@@ -47,6 +53,7 @@ const product = {
     key: 'toychamp',
     adapterKey: 'toychamp',
     ignoreRobotsTxt: false,
+    adapterConfig: null,
   },
 };
 
@@ -92,7 +99,10 @@ describe('POST /api/products/:id/check', () => {
     const response = await makeRequest('product-1');
     const body = await response.json();
 
-    expect(checkProduct).toHaveBeenCalledWith(product.url);
+    expect(checkProduct).toHaveBeenCalledWith(product.url, {
+      timeoutMs: undefined,
+      customHeaders: undefined,
+    });
     expect(response.status).toBe(200);
     expect(body.id).toBe('check-1');
     expect(createStockEvent).not.toHaveBeenCalled();
@@ -145,6 +155,39 @@ describe('POST /api/products/:id/check', () => {
 
     expect(response.status).toBe(200);
     expect(createStockEvent).not.toHaveBeenCalled();
+  });
+
+  test('applies per-store AdapterConfig overrides to the manual check (#30)', async () => {
+    findUniqueProduct.mockResolvedValue({
+      ...product,
+      store: {
+        ...product.store,
+        adapterConfig: {
+          config: {
+            minIntervalMs: 20_000,
+            defaultTimeoutMs: 5_000,
+            customHeaders: { 'X-Api-Key': 'store-secret' },
+          },
+        },
+      },
+    });
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue({
+      inStock: true,
+      price: 10,
+      currency: 'EUR',
+      availability: 'In stock',
+      checkedAt: new Date(),
+    });
+    createStockCheck.mockResolvedValue({ id: 'check-1', inStock: true, price: 10 });
+
+    await makeRequest('product-1');
+
+    expect(throttleDomain).toHaveBeenCalledWith('www.toychamp.be', 20_000);
+    expect(checkProduct).toHaveBeenCalledWith(product.url, {
+      timeoutMs: 5_000,
+      customHeaders: { 'X-Api-Key': 'store-secret' },
+    });
   });
 
   test('returns 404 when the product does not exist', async () => {

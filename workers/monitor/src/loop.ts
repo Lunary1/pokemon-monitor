@@ -6,7 +6,7 @@ import {
   throttleDomain,
 } from '@pokemon-monitor/core';
 import { prisma, type StockEvent } from '@pokemon-monitor/db';
-import { getAdapter } from '@pokemon-monitor/store-adapters';
+import { getAdapter, resolveAdapterConfig } from '@pokemon-monitor/store-adapters';
 
 export interface RunCheckCycleOptions {
   /**
@@ -23,6 +23,7 @@ export async function runCheckCycle(
     where: { enabled: true },
     include: {
       products: { where: { enabled: true } },
+      adapterConfig: true,
     },
   });
 
@@ -35,6 +36,11 @@ export async function runCheckCycle(
       );
       continue;
     }
+
+    // Per-store overrides from the AdapterConfig table (#30). Resolved every
+    // cycle, not cached at startup, so dashboard edits apply within a minute
+    // without a worker restart.
+    const config = resolveAdapterConfig(adapter.config, store.adapterConfig?.config);
 
     for (const product of store.products) {
       const lastCheck = await prisma.stockCheck.findFirst({
@@ -66,11 +72,11 @@ export async function runCheckCycle(
       // baseUrl — multi-domain adapters (e.g. shopify-generic) serve many
       // stores, and a shared adapter-level key would pool unrelated domains
       // into one bucket. Identical behaviour for single-store adapters.
-      await throttleDomain(
-        new URL(product.url).hostname,
-        adapter.config.minIntervalMs,
-      );
-      const result = await adapter.checkProduct(product.url);
+      await throttleDomain(new URL(product.url).hostname, config.minIntervalMs);
+      const result = await adapter.checkProduct(product.url, {
+        timeoutMs: config.defaultTimeoutMs,
+        customHeaders: config.customHeaders,
+      });
 
       const stockCheck = await prisma.stockCheck.create({
         data: {

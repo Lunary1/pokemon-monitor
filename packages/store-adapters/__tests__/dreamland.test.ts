@@ -71,6 +71,38 @@ describe('DreamlandAdapter', () => {
     expect(result.availability).toContain('Connection timeout');
   });
 
+  test('sends caller-provided customHeaders instead of its defaults (#30)', async () => {
+    const html = await loadFixture('dreamland-instock.html');
+    const scope = nock('https://www.dreamland.be', {
+      reqheaders: {
+        'x-api-key': 'store-secret',
+        'accept-language': 'fr-BE',
+      },
+    })
+      .get(productPath)
+      .reply(200, html);
+
+    const result = await new DreamlandAdapter().checkProduct(productUrl, {
+      customHeaders: { 'X-Api-Key': 'store-secret', 'Accept-Language': 'fr-BE' },
+    });
+
+    expect(scope.isDone()).toBe(true);
+    expect(result.inStock).toBe(true);
+  });
+
+  test('falls back to its own default headers when no customHeaders are given', async () => {
+    const html = await loadFixture('dreamland-instock.html');
+    const scope = nock('https://www.dreamland.be', {
+      reqheaders: { 'accept-language': 'nl-BE,nl;q=0.9' },
+    })
+      .get(productPath)
+      .reply(200, html);
+
+    await new DreamlandAdapter().checkProduct(productUrl);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
   test('returns error result on a 403 bot block without throwing', async () => {
     // The live site 403s aggressively; this must never look like out-of-stock.
     nock('https://www.dreamland.be').get(productPath).reply(403, 'Forbidden');

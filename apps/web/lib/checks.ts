@@ -6,7 +6,7 @@ import {
   throttleDomain,
 } from '@pokemon-monitor/core';
 import { prisma, type StockCheck } from '@pokemon-monitor/db';
-import { getAdapter } from '@pokemon-monitor/store-adapters';
+import { getAdapter, resolveAdapterConfig } from '@pokemon-monitor/store-adapters';
 
 export class ProductNotFoundError extends Error {
   constructor(productId: string) {
@@ -32,7 +32,7 @@ export class RobotsDisallowedError extends Error {
 export async function runManualCheck(productId: string): Promise<StockCheck> {
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    include: { store: true },
+    include: { store: { include: { adapterConfig: true } } },
   });
   if (!product) throw new ProductNotFoundError(productId);
 
@@ -60,11 +60,18 @@ export async function runManualCheck(productId: string): Promise<StockCheck> {
     orderBy: { checkedAt: 'desc' },
   });
 
+  // Per-store overrides from the AdapterConfig table (#30) — same resolution
+  // the worker loop applies, so a manual check behaves like a scheduled one.
+  const config = resolveAdapterConfig(adapter.config, product.store.adapterConfig?.config);
+
   // Throttle on the product's own host, not the adapter's configured baseUrl —
   // multi-domain adapters (e.g. shopify-generic) serve many stores, and a
   // shared adapter-level key would pool unrelated domains into one bucket.
-  await throttleDomain(new URL(product.url).hostname, adapter.config.minIntervalMs);
-  const result = await adapter.checkProduct(product.url);
+  await throttleDomain(new URL(product.url).hostname, config.minIntervalMs);
+  const result = await adapter.checkProduct(product.url, {
+    timeoutMs: config.defaultTimeoutMs,
+    customHeaders: config.customHeaders,
+  });
 
   const stockCheck = await prisma.stockCheck.create({
     data: {

@@ -31,12 +31,18 @@ vi.mock('@pokemon-monitor/core', () => ({
 }));
 
 const checkProduct = vi.fn();
-vi.mock('@pokemon-monitor/store-adapters', () => ({
-  getAdapter: vi.fn(() => ({
-    checkProduct,
-    config: { baseUrl: 'https://www.toychamp.be', minIntervalMs: 5_000 },
-  })),
-}));
+// Keep the real resolveAdapterConfig so these tests exercise the actual
+// override-merging the loop relies on; only the registry lookup is mocked.
+vi.mock('@pokemon-monitor/store-adapters', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@pokemon-monitor/store-adapters')>();
+  return {
+    ...actual,
+    getAdapter: vi.fn(() => ({
+      checkProduct,
+      config: { baseUrl: 'https://www.toychamp.be', minIntervalMs: 5_000 },
+    })),
+  };
+});
 
 import { isUrlAllowed, throttleDomain } from '@pokemon-monitor/core';
 import { runCheckCycle } from '../src/loop';
@@ -238,6 +244,72 @@ describe('runCheckCycle', () => {
     expect(throttleDomain).toHaveBeenCalledWith('shop-one.example', 5_000);
     expect(throttleDomain).toHaveBeenCalledWith('shop-two.example', 5_000);
     expect(throttleDomain).not.toHaveBeenCalledWith('www.toychamp.be', 5_000);
+  });
+});
+
+describe('runCheckCycle — per-store AdapterConfig overrides (#30)', () => {
+  const inStockResult = {
+    inStock: true,
+    price: 10,
+    currency: 'EUR',
+    availability: 'In stock',
+    checkedAt: new Date(),
+  };
+
+  test('applies throttle, timeout, and header overrides from the store row', async () => {
+    findManyStore.mockResolvedValue([
+      {
+        ...baseStore,
+        adapterConfig: {
+          config: {
+            minIntervalMs: 30_000,
+            defaultTimeoutMs: 5_000,
+            customHeaders: { 'X-Api-Key': 'store-secret' },
+          },
+        },
+        products: [baseProduct],
+      },
+    ]);
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue(inStockResult);
+    createStockCheck.mockResolvedValue({ inStock: true, price: 10 });
+
+    await runCheckCycle();
+
+    expect(throttleDomain).toHaveBeenCalledWith('www.toychamp.be', 30_000);
+    expect(checkProduct).toHaveBeenCalledWith(baseProduct.url, {
+      timeoutMs: 5_000,
+      customHeaders: { 'X-Api-Key': 'store-secret' },
+    });
+  });
+
+  test('a store without an AdapterConfig row keeps the adapter defaults', async () => {
+    findManyStore.mockResolvedValue([
+      { ...baseStore, adapterConfig: null, products: [baseProduct] },
+    ]);
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue(inStockResult);
+    createStockCheck.mockResolvedValue({ inStock: true, price: 10 });
+
+    await runCheckCycle();
+
+    expect(throttleDomain).toHaveBeenCalledWith('www.toychamp.be', 5_000);
+  });
+
+  test('a malformed config blob degrades to adapter defaults, not a crash', async () => {
+    findManyStore.mockResolvedValue([
+      {
+        ...baseStore,
+        adapterConfig: { config: 'not an object at all' },
+        products: [baseProduct],
+      },
+    ]);
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue(inStockResult);
+    createStockCheck.mockResolvedValue({ inStock: true, price: 10 });
+
+    await expect(runCheckCycle()).resolves.not.toThrow();
+    expect(throttleDomain).toHaveBeenCalledWith('www.toychamp.be', 5_000);
   });
 });
 

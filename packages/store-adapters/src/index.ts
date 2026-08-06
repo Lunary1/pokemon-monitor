@@ -11,6 +11,12 @@ export {
 export { ToyChampAdapter } from './adapters/toychamp';
 export { parseProductJsonLd, JsonLdParseError } from './jsonld';
 export type { JsonLdProduct } from './jsonld';
+export {
+  parseAdapterOverrides,
+  resolveAdapterConfig,
+  validateAdapterOverrides,
+} from './store-config';
+export type { AdapterOverrides } from './store-config';
 
 export type {
   AdapterConfig,
