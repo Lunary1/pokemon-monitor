@@ -1,4 +1,5 @@
 import type { ProductListItem } from '../lib/products';
+import { CheckNowButton } from './CheckNowButton';
 import { StatusBadge, type StatusBadgeStatus } from './StatusBadge';
 
 function statusOf(product: ProductListItem): StatusBadgeStatus {
@@ -16,10 +17,7 @@ export function ProductCard({ product }: { product: ProductListItem }) {
   const check = product.latestCheck;
 
   return (
-    <a
-      href={product.url}
-      target="_blank"
-      rel="noreferrer"
+    <div
       style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -28,14 +26,17 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         padding: 16,
         border: '1px solid var(--color-border)',
         borderRadius: 8,
-        textDecoration: 'none',
-        color: 'inherit',
       }}
     >
-      <div>
+      <a
+        href={product.url}
+        target="_blank"
+        rel="noreferrer"
+        style={{ textDecoration: 'none', color: 'inherit' }}
+      >
         <div style={{ fontWeight: 600 }}>{product.name}</div>
         <div style={{ fontSize: 13, color: 'var(--color-muted)' }}>{product.store.name}</div>
-      </div>
+      </a>
       <div style={{ textAlign: 'right' }}>
         <StatusBadge status={statusOf(product)} />
         <div style={{ marginTop: 6, fontSize: 14 }}>
@@ -44,7 +45,10 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>
           {check ? `Checked ${new Date(check.checkedAt).toLocaleString()}` : 'Never checked'}
         </div>
+        <div style={{ marginTop: 8 }}>
+          <CheckNowButton productId={product.id} />
+        </div>
       </div>
-    </a>
+    </div>
   );
 }
