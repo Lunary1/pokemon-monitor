@@ -207,4 +207,34 @@ describe('runCheckCycle', () => {
     await expect(runCheckCycle()).resolves.not.toThrow();
     expect(checkProduct).not.toHaveBeenCalled();
   });
+
+  test('throttles on the product host, not the adapter baseUrl', async () => {
+    // Multi-domain adapters (shopify-generic) carry a placeholder baseUrl, so
+    // pooling every store onto that one key would defeat the per-domain
+    // throttle. Each product must throttle against its own host.
+    findManyStore.mockResolvedValue([
+      {
+        ...baseStore,
+        products: [
+          { id: 'product-1', url: 'https://shop-one.example/products/booster' },
+          { id: 'product-2', url: 'https://shop-two.example/products/booster' },
+        ],
+      },
+    ]);
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue({
+      inStock: true,
+      price: 10,
+      currency: 'EUR',
+      availability: 'In stock',
+      checkedAt: new Date(),
+    });
+    createStockCheck.mockResolvedValue({ inStock: true, price: 10 });
+
+    await runCheckCycle();
+
+    expect(throttleDomain).toHaveBeenCalledWith('shop-one.example', 5_000);
+    expect(throttleDomain).toHaveBeenCalledWith('shop-two.example', 5_000);
+    expect(throttleDomain).not.toHaveBeenCalledWith('www.toychamp.be', 5_000);
+  });
 });
