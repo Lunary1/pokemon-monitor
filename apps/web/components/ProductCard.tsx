@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ProductListItem } from '../lib/products';
 import { CheckNowButton } from './CheckNowButton';
 import { StatusBadge, type StatusBadgeStatus } from './StatusBadge';
@@ -30,15 +31,23 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         borderRadius: 8,
       }}
     >
-      <a
-        href={product.url}
-        target="_blank"
-        rel="noreferrer"
-        style={{ textDecoration: 'none', color: 'inherit' }}
-      >
-        <div style={{ fontWeight: 600 }}>{product.name}</div>
+      <div>
+        <Link
+          href={`/products/${product.id}`}
+          style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}
+        >
+          {product.name}
+        </Link>
         <div style={{ fontSize: 13, color: 'var(--color-muted)' }}>{product.store.name}</div>
-      </a>
+        <a
+          href={product.url}
+          target="_blank"
+          rel="noreferrer"
+          style={{ fontSize: 12, color: 'var(--color-muted)' }}
+        >
+          View on store ↗
+        </a>
+      </div>
       <div style={{ textAlign: 'right' }}>
         <StatusBadge status={statusOf(product)} />
         <div style={{ marginTop: 6, fontSize: 14 }}>
