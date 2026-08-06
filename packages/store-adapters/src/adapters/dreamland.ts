@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import got from 'got';
+import { parseProductJsonLd } from '../jsonld';
 import type {
   AdapterConfig,
   CheckOptions,
@@ -7,13 +8,21 @@ import type {
   StoreAdapter,
 } from '../types';
 
-const SELECTORS = {
-  stock: '.product-availability, .stock-status, [data-stock]',
-  price: '.product-price .price, [data-price]',
-} as const;
-
 const TRACKING_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'ref'];
 
+/**
+ * Adapter for the Dreamland storefront.
+ *
+ * Also serves ToyChamp: `toychamp.be` product URLs 301-redirect cross-host to
+ * `dreamland.be` (the page reports channel `DREV`, "Web Shop Dreamland
+ * Vlaanderen") — the chains have merged. This class is registered under both
+ * the `dreamland` and `toychamp` keys so existing Store rows keep resolving.
+ *
+ * Stock and price come from the page's JSON-LD Product markup rather than CSS
+ * selectors, per plan §5's data-source priority. See #86: the previous
+ * selector-based implementation silently reported every product as out of
+ * stock once the markup changed under it.
+ */
 export class DreamlandAdapter implements StoreAdapter {
   config: AdapterConfig = {
     storeKey: 'dreamland',
@@ -34,10 +43,7 @@ export class DreamlandAdapter implements StoreAdapter {
     return u.toString();
   }
 
-  async checkProduct(
-    url: string,
-    options?: CheckOptions,
-  ): Promise<StockResult> {
+  async checkProduct(url: string, options?: CheckOptions): Promise<StockResult> {
     const checkedAt = new Date();
 
     try {
@@ -51,26 +57,20 @@ export class DreamlandAdapter implements StoreAdapter {
         followRedirect: true,
       });
 
-      const $ = cheerio.load(response.body);
-      const stockText = $(SELECTORS.stock).first().text().trim();
-      const priceText = $(SELECTORS.price).first().text().trim();
-
-      const inStock =
-        /op voorraad|in stock|beschikbaar/i.test(stockText) &&
-        !/niet beschikbaar|uitverkocht|out of stock/i.test(stockText);
-
-      const price =
-        parseFloat(priceText.replace(/[^0-9,]/g, '').replace(',', '.')) ||
-        null;
+      const product = parseProductJsonLd(cheerio.load(response.body));
 
       return {
-        inStock,
-        price,
-        currency: 'EUR',
-        availability: stockText,
+        inStock: product.inStock,
+        price: product.price,
+        currency: product.currency,
+        title: product.name,
+        availability: product.availability,
         checkedAt,
       };
     } catch (err) {
+      // Includes JsonLdParseError: an unreadable page is reported as an error,
+      // never as inStock: false. A silent false negative is indistinguishable
+      // from a real out-of-stock, which is the bug this adapter had (#86).
       return {
         inStock: false,
         price: null,
