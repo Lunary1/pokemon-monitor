@@ -29,8 +29,23 @@ test('user can navigate the dashboard and trigger a manual check', async ({ page
   // actually worth covering here is that the click reaches the API at all:
   // the button leaves its idle "Check now" state and lands on some terminal,
   // re-clickable state instead of hanging forever.
-  const checkButton = page.getByRole('button', { name: /check now/i });
+  const checkButton = page.getByRole('button', { name: /check now/i }).first();
   await expect(checkButton).toBeVisible();
   await checkButton.click();
-  await expect(page.getByRole('button', { name: /check now|failed/i })).toBeEnabled();
+  await expect(page.getByRole('button', { name: /check now|failed/i }).first()).toBeEnabled();
+});
+
+test('user can open a product detail page and see its check history', async ({ page }) => {
+  await page.goto('/products');
+
+  await page.getByRole('link', { name: 'E2E Booster Box' }).click();
+  await expect(page).toHaveURL(/\/products\/[^/]+$/);
+
+  await expect(page.getByRole('heading', { name: 'E2E Booster Box' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Check history' })).toBeVisible();
+  // The seed writes one StockCheck, so there is always at least one row.
+  await expect(page.getByTestId('check-row').first()).toBeVisible();
+
+  await page.getByRole('link', { name: /back to products/i }).click();
+  await expect(page).toHaveURL(/\/products$/);
 });
