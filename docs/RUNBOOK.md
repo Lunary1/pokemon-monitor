@@ -36,6 +36,45 @@ UptimeRobot (or equivalent) should ping `/api/health` every 5 minutes and alert 
 | Restocks appear in `StockEvent` / dashboard but no Discord message arrives | Notification path broken between event and delivery | Check `Notification.status` for the relevant row — `FAILED` means the webhook rejected the send (check `Notification.error`); a pile of `PENDING` rows means the notification dispatcher itself isn't running or is stuck; use `POST /api/notifications/test` to send a probe message and confirm the webhook itself still works (also catches a revoked/deleted Discord webhook) |
 | One adapter's products all show `inStock: false` and never flip | Store changed HTML/selectors, or the adapter is being blocked (429/CAPTCHA/IP ban) | Check `ErrorLog` filtered to `source: adapter:<key>` for parse errors or non-200 responses; manually fetch the product URL to see if the page layout changed; per `docs/SDLC.md` §7 (Phase 7 gate), an adapter breaking 2+ times in 30 days needs a design review toward a more stable data source (JSON endpoint) rather than another selector patch |
 | Notification storm — many restock messages in a short window, most look like false positives | A flapping product (rapid in-stock/out-of-stock oscillation) is defeating debounce, or debounce isn't implemented for that path | Immediate containment: set `Setting.notificationsEnabled = false` (direct DB update or settings UI) to stop the bleeding; then diagnose the specific product's `StockCheck` history for the flap pattern before re-enabling |
+| Red "Notifications are failing" banner across the top of the dashboard | The last 3 consecutive Discord delivery attempts failed — most often a revoked or deleted webhook | See "Dead Discord webhook" below |
+
+## Dead Discord webhook
+
+The notification channel is a single point of failure: the same Discord webhook carries both restock alerts and (per `docs/SDLC.md` §9) ops alerts. When it breaks, an alert sent *through* it cannot arrive — so detection has to come from somewhere else.
+
+### Detecting it
+
+Three independent signals, in order of how likely you are to notice:
+
+1. **The dashboard banner.** Shown on every dashboard page when the 3 most recent delivery attempts all failed. The dashboard is reachable independently of Discord, which is the point — this is the signal that still works when the channel itself is down. `SKIPPED` rows (cooldown, dedup, notifications disabled) are excluded, so a quiet period never fakes or masks an outage.
+2. **`ErrorLog` rows with `source: notification`.** Every failed dispatch writes one, with the transport error in `message` and `{ eventId, productId, channel }` in `context`.
+3. **`Notification` rows with `status = FAILED`.** The per-attempt record, with the raw error in `Notification.error`.
+
+```sql
+-- Recent notification failures, newest first
+SELECT "occurredAt", message, context
+FROM "ErrorLog"
+WHERE source = 'notification'
+ORDER BY "occurredAt" DESC
+LIMIT 20;
+
+-- Delivery attempts (ignoring skips), to confirm it's persistent rather than one blip
+SELECT "createdAt", status, error
+FROM "Notification"
+WHERE status IN ('SENT', 'FAILED')
+ORDER BY "createdAt" DESC
+LIMIT 10;
+```
+
+### Recovering
+
+1. **Confirm the webhook is the problem.** A `401`/`404` in `Notification.error` means the webhook was revoked or deleted on Discord's side. A `429` is rate limiting — that resolves on its own; don't regenerate the webhook for it. A connection/timeout error points at network or a Discord outage rather than your configuration.
+2. **Regenerate it in Discord:** Server Settings → Integrations → Webhooks → pick or create the webhook → Copy Webhook URL.
+3. **Update it in the app:** paste the new URL into the dashboard's Settings page (`/settings`). That writes `Setting.discordWebhookUrl`, which takes precedence over the `DISCORD_WEBHOOK_URL` env var — so updating the env var alone will *not* take effect while a value is set in Settings.
+4. **Verify.** Trigger a real delivery rather than waiting for a natural restock: open a product, press **Check now**, and confirm a new `Notification` row lands with `status = SENT`. Note the per-product cooldown (`Setting.defaultCooldownSecs`, default 1h) suppresses repeat sends — if the check produces a `SKIPPED` row for cooldown, that confirms the pipeline is alive but doesn't confirm the webhook. Check against a product that hasn't notified recently, or temporarily lower the cooldown in Settings.
+5. **Confirm the banner clears.** It disappears once a successful delivery breaks the consecutive-failure streak.
+
+> `docs/SDLC.md` §9 and the failure table above both mention `POST /api/notifications/test` as a probe endpoint. **That endpoint is not implemented** — it's plan §11 API surface that hasn't been built. Use the "Check now" path in step 4 instead until it exists.
 
 ## Rollback (Railway)
 
