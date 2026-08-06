@@ -8,15 +8,19 @@ test('user can navigate the dashboard and trigger a manual check', async ({ page
   const productCard = page.getByTestId('product-card').filter({ hasText: 'E2E Booster Box' });
   await expect(productCard.getByText('In stock', { exact: false })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Events' }).click();
+  // Scope to the nav: the notification-failure banner also links to Settings,
+  // so an unscoped by-name lookup is ambiguous whenever that banner is showing.
+  const nav = page.getByRole('navigation', { name: 'Main' });
+
+  await nav.getByRole('link', { name: 'Events' }).click();
   await expect(page).toHaveURL(/\/events$/);
   await expect(page.getByRole('heading', { name: 'Events' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Settings' }).click();
+  await nav.getByRole('link', { name: 'Settings' }).click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Products' }).click();
+  await nav.getByRole('link', { name: 'Products' }).click();
   await expect(page).toHaveURL(/\/products$/);
 
   // The seeded product points at a non-routable URL, so the adapter's HTTP
@@ -48,4 +52,14 @@ test('user can open a product detail page and see its check history', async ({ p
 
   await page.getByRole('link', { name: /back to products/i }).click();
   await expect(page).toHaveURL(/\/products$/);
+});
+
+test('does not show the notification failure banner when deliveries are healthy', async ({
+  page,
+}) => {
+  // The seed writes no failed notifications, so the banner must stay hidden —
+  // guards against it rendering unconditionally and crying wolf.
+  await page.goto('/products');
+
+  await expect(page.getByTestId('notification-failure-banner')).toHaveCount(0);
 });
