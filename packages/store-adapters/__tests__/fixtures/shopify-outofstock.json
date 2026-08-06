@@ -1,19 +1,94 @@
 {
-  "product": {
-    "id": 7234567890124,
-    "title": "Pokemon TCG Scarlet & Violet Elite Trainer Box",
-    "handle": "pokemon-sv-etb",
-    "vendor": "The Pokemon Company",
-    "product_type": "Trading Cards",
-    "variants": [
-      {
-        "id": 41234567890124,
-        "title": "Default Title",
-        "price": "49.95",
-        "sku": "PKM-SV-ETB-01",
-        "available": false,
-        "inventory_quantity": 0
-      }
-    ]
-  }
+    "id":  15641730384137,
+    "title":  "One Piece - ST35 Starter Deck Rood/zwart Sabo",
+    "handle":  "one-piece-st35-starter-deck-rood-zwart-sabo",
+    "description":  "\u003cp\u003e\u003cstrong style=\"font-size: 0.875rem;\"\u003eOne Piece Trading Card Game - ST35 Starter Deck. Engelse set met veel gave \u0026amp; nieuwe pulls.\u003c/strong\u003e\u003c/p\u003e\n\u003cp class=\"PDq2pG_selectionAnchorContainer\"\u003eStarter Deck ST-35: Rood/zwart Sabo is een uitstekende keuze voor nieuwe spelers en voor iedereen die zijn rood/zwarte decks in de ONE PIECE CARD GAME wil versterken. Dankzij de eenvoudige speelstijl en de kenmerkende rood/zwarte spelmechanieken is dit deck gemakkelijk op te pakken. Daarnaast bevat het 5 gloednieuwe kaarten die extra mogelijkheden bieden voor deckbuilding en nieuwe strategische opties.\u003cspan class=\"PDq2pG_selectionAnchor\"\u003e\u003c/span\u003e\u003c/p\u003e\n\u003cp\u003eNaast het direct speelbare deck ontvang je ook een Booster Pack OP-16, waarmee je je deck verder kunt versterken en je verzameling kunt uitbreiden.\u003c/p\u003e\n\u003cp\u003e\u003cstrong\u003eDe One Piece TCG: ST35 Starter Deck bevat:\u003c/strong\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e1 Samengesteld Deck (51 kaarten)\u003c/li\u003e\n\u003cli\u003e1 Speelmat\u003c/li\u003e\n\u003cli\u003e10 DON!! kaarten\u003c/li\u003e\n\u003cli\u003e1 Booster Pack OP-16\u003c/li\u003e\n\u003c/ul\u003e",
+    "published_at":  "2026-07-31T13:10:10+02:00",
+    "created_at":  "2026-07-31T13:03:25+02:00",
+    "vendor":  "TcgReus",
+    "type":  "",
+    "tags":  [
+
+             ],
+    "price":  1495,
+    "price_min":  1495,
+    "price_max":  1495,
+    "available":  false,
+    "price_varies":  false,
+    "compare_at_price":  null,
+    "compare_at_price_min":  0,
+    "compare_at_price_max":  0,
+    "compare_at_price_varies":  false,
+    "variants":  [
+                     {
+                         "id":  57230559117577,
+                         "title":  "Default Title",
+                         "option1":  "Default Title",
+                         "option2":  null,
+                         "option3":  null,
+                         "sku":  null,
+                         "requires_shipping":  true,
+                         "taxable":  true,
+                         "featured_image":  null,
+                         "available":  false,
+                         "name":  "One Piece - ST35 Starter Deck Rood/zwart Sabo",
+                         "public_title":  null,
+                         "options":  [
+                                         "Default Title"
+                                     ],
+                         "price":  1495,
+                         "weight":  300,
+                         "compare_at_price":  null,
+                         "inventory_management":  "shopify",
+                         "barcode":  null,
+                         "quantity_rule":  {
+                                               "min":  1,
+                                               "max":  null,
+                                               "increment":  1
+                                           },
+                         "quantity_price_breaks":  [
+
+                                                   ],
+                         "requires_selling_plan":  false,
+                         "selling_plan_allocations":  [
+
+                                                      ]
+                     }
+                 ],
+    "images":  [
+                   "//cdn.shopify.com/s/files/1/0697/9708/5449/files/One_Piece_-_ST35_Starter_Deck_Roodzwart_Sabo_-_TcgReus.png?v=1785495899"
+               ],
+    "featured_image":  "//cdn.shopify.com/s/files/1/0697/9708/5449/files/One_Piece_-_ST35_Starter_Deck_Roodzwart_Sabo_-_TcgReus.png?v=1785495899",
+    "options":  [
+                    {
+                        "name":  "Title",
+                        "position":  1,
+                        "values":  [
+                                       "Default Title"
+                                   ]
+                    }
+                ],
+    "url":  "/products/one-piece-st35-starter-deck-rood-zwart-sabo",
+    "media":  [
+                  {
+                      "alt":  null,
+                      "id":  69344838123785,
+                      "position":  1,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1000,
+                                            "width":  1000,
+                                            "src":  "https://cdn.shopify.com/s/files/1/0697/9708/5449/files/One_Piece_-_ST35_Starter_Deck_Roodzwart_Sabo_-_TcgReus.png?v=1785495899"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1000,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/0697/9708/5449/files/One_Piece_-_ST35_Starter_Deck_Roodzwart_Sabo_-_TcgReus.png?v=1785495899",
+                      "width":  1000
+                  }
+              ],
+    "requires_selling_plan":  false,
+    "selling_plan_groups":  [
+
+                            ]
 }
