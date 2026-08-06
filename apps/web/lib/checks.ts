@@ -31,7 +31,10 @@ export async function runManualCheck(productId: string): Promise<StockCheck> {
     orderBy: { checkedAt: 'desc' },
   });
 
-  await throttleDomain(new URL(adapter.config.baseUrl).hostname, adapter.config.minIntervalMs);
+  // Throttle on the product's own host, not the adapter's configured baseUrl —
+  // multi-domain adapters (e.g. shopify-generic) serve many stores, and a
+  // shared adapter-level key would pool unrelated domains into one bucket.
+  await throttleDomain(new URL(product.url).hostname, adapter.config.minIntervalMs);
   const result = await adapter.checkProduct(product.url);
 
   const stockCheck = await prisma.stockCheck.create({

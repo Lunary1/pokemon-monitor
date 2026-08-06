@@ -1,0 +1,19 @@
+{
+  "product": {
+    "id": 7234567890123,
+    "title": "Pokemon TCG Scarlet & Violet Booster Box",
+    "handle": "pokemon-sv-booster-box",
+    "vendor": "The Pokemon Company",
+    "product_type": "Trading Cards",
+    "variants": [
+      {
+        "id": 41234567890123,
+        "title": "Default Title",
+        "price": "159.95",
+        "sku": "PKM-SV-BB-01",
+        "available": true,
+        "inventory_quantity": 12
+      }
+    ]
+  }
+}
