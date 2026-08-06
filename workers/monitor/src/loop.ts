@@ -1,4 +1,10 @@
-import { detectTransition, isErrorResult, logger, throttleDomain } from '@pokemon-monitor/core';
+import {
+  detectTransition,
+  isErrorResult,
+  isUrlAllowed,
+  logger,
+  throttleDomain,
+} from '@pokemon-monitor/core';
 import { prisma, type StockEvent } from '@pokemon-monitor/db';
 import { getAdapter } from '@pokemon-monitor/store-adapters';
 
@@ -40,6 +46,21 @@ export async function runCheckCycle(
         ? lastCheck.checkedAt.getTime() + store.pollingInterval * 1000
         : 0;
       if (Date.now() < dueAt) continue;
+
+      // robots.txt gate (SDLC §7). Checked before throttling so a skipped
+      // product doesn't consume the domain's rate budget.
+      if (store.ignoreRobotsTxt) {
+        logger.warn(
+          { storeKey: store.key, productId: product.id },
+          'robots.txt check bypassed by store configuration',
+        );
+      } else if (!(await isUrlAllowed(product.url))) {
+        logger.warn(
+          { storeKey: store.key, productId: product.id, url: product.url },
+          'robots.txt disallows this URL, skipping product',
+        );
+        continue;
+      }
 
       // Throttle on the product's own host, not the adapter's configured
       // baseUrl — multi-domain adapters (e.g. shopify-generic) serve many
