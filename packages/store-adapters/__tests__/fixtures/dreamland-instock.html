@@ -1,12 +1,44 @@
 <!doctype html>
+<!--
+  Same JSON-LD structure as the captured out-of-stock fixture (product
+  01841701, fetched 2026-08-06), with availability switched to
+  schema.org/InStock and the price/name taken from product 01841770
+  ("Pokemon Scarlet & Violet 09 - Blister 3 boosters", price 19.99), whose
+  JSON-LD was also captured live.
+
+  The site 403-blocked before a full in-stock page could be captured, so this
+  combines two genuine payloads rather than being a single verbatim response.
+  See the #86 PR.
+-->
 <html lang="nl-BE">
+  <head>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "url": "https://www.dreamland.be/nl/producten/pokemon-scarlet-violet-09-blister-3-boosters/01841770",
+        "brand": { "@type": "Brand" },
+        "category": {
+          "@type": "CategoryCode",
+          "name": "Ruilkaarten",
+          "url": "https://www.dreamland.be/nl/c/categorie/gezelschapspellen-en-puzzels/ruilkaarten/producten"
+        },
+        "name": "Pokemon Scarlet & Violet 09 - Blister 3 boosters",
+        "offers": {
+          "@type": "Offer",
+          "price": "19.99",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock"
+        },
+        "image": [
+          "https://www.dreamland.be/media/cache/default_gallery_main/media/image/01841770/01841770_001.jpg"
+        ]
+      }
+    </script>
+  </head>
   <body>
     <main>
-      <h1>Pokemon Scarlet & Violet Booster Box</h1>
-      <p class="product-availability">Op voorraad</p>
-      <div class="product-price">
-        <span class="price">€54,99</span>
-      </div>
+      <h1>Pokemon Scarlet &amp; Violet 09 - Blister 3 boosters</h1>
     </main>
   </body>
 </html>

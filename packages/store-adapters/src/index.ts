@@ -1,6 +1,5 @@
 import { DreamlandAdapter } from './adapters/dreamland';
 import { ShopifyGenericAdapter } from './adapters/shopify-generic';
-import { ToyChampAdapter } from './adapters/toychamp';
 import type { StoreAdapter } from './types';
 
 export { DreamlandAdapter } from './adapters/dreamland';
@@ -10,6 +9,8 @@ export {
   extractShopifyHandle,
 } from './adapters/shopify-generic';
 export { ToyChampAdapter } from './adapters/toychamp';
+export { parseProductJsonLd, JsonLdParseError } from './jsonld';
+export type { JsonLdProduct } from './jsonld';
 
 export type {
   AdapterConfig,
@@ -18,9 +19,14 @@ export type {
   StoreAdapter,
 } from './types';
 
+// ToyChamp and Dreamland are one storefront now — toychamp.be redirects to
+// dreamland.be (#86). Both keys resolve to the same instance so existing Store
+// rows keep working without a migration.
+const dreamland = new DreamlandAdapter();
+
 const adapters: Record<string, StoreAdapter> = {
-  toychamp: new ToyChampAdapter(),
-  dreamland: new DreamlandAdapter(),
+  dreamland,
+  toychamp: dreamland,
   'shopify-generic': new ShopifyGenericAdapter(),
 };
 
