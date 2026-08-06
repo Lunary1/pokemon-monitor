@@ -1,4 +1,8 @@
 import Link from 'next/link';
+import { NotificationFailureBanner } from '../../components/NotificationFailureBanner';
+import { getNotificationHealth } from '../../lib/notification-health';
+
+export const dynamic = 'force-dynamic';
 
 const NAV_LINKS = [
   { href: '/products', label: 'Products' },
@@ -6,13 +10,16 @@ const NAV_LINKS = [
   { href: '/settings', label: 'Settings' },
 ];
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const notificationHealth = await getNotificationHealth();
+
   return (
     <>
+      <NotificationFailureBanner health={notificationHealth} />
       <header
         style={{
           borderBottom: '1px solid var(--color-border)',
