@@ -13,6 +13,11 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": ["playwright-report/**", "test-results/**"]
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": []
