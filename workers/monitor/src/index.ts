@@ -1,4 +1,5 @@
 import { logger } from '@pokemon-monitor/core';
+import { dispatch } from '@pokemon-monitor/notifications';
 import cron from 'node-cron';
 import { runCheckCycle } from './loop';
 
@@ -13,7 +14,13 @@ cron.schedule(TICK_SCHEDULE, () => {
   }
 
   running = true;
-  runCheckCycle()
+  runCheckCycle({
+    // dispatch() reports its outcome to callers that want it; the loop hook
+    // doesn't, so swallow the return value rather than widen the hook's type.
+    onStockEvent: async (event) => {
+      await dispatch(event);
+    },
+  })
     .catch((err) => {
       logger.error({ err }, 'check cycle failed');
     })
