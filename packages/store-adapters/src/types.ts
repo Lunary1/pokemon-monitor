@@ -11,6 +11,7 @@ export interface StockResult {
 export interface CheckOptions {
   timeoutMs?: number; // default: 10_000
   userAgent?: string; // default: set per adapter
+  customHeaders?: Record<string, string>; // replaces the adapter's default headers when set
 }
 
 export interface AdapterConfig {

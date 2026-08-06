@@ -87,7 +87,7 @@ export class ShopifyGenericAdapter implements StoreAdapter {
         timeout: { request: options?.timeoutMs ?? this.config.defaultTimeoutMs },
         headers: {
           'User-Agent': options?.userAgent ?? 'Mozilla/5.0 (personal stock monitor)',
-          ...this.config.customHeaders,
+          ...(options?.customHeaders ?? this.config.customHeaders),
         },
         followRedirect: true,
       }).json<ShopifyProductResponse>();

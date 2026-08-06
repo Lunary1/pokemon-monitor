@@ -56,6 +56,22 @@ describe('ShopifyGenericAdapter', () => {
     nock.enableNetConnect();
   });
 
+  test('sends caller-provided customHeaders on the request (#30)', async () => {
+    const body = await loadFixture('shopify-instock.json');
+    const scope = nock(storeOrigin, {
+      reqheaders: { 'x-api-key': 'store-secret' },
+    })
+      .get(jsonPath)
+      .reply(200, body);
+
+    const result = await new ShopifyGenericAdapter().checkProduct(productUrl, {
+      customHeaders: { 'X-Api-Key': 'store-secret' },
+    });
+
+    expect(scope.isDone()).toBe(true);
+    expect(result.inStock).toBe(true);
+  });
+
   test('detects in-stock product', async () => {
     const body = await loadFixture('shopify-instock.json');
     nock(storeOrigin).get(jsonPath).reply(200, body);
