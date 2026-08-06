@@ -1,0 +1,19 @@
+{
+  "product": {
+    "id": 7234567890124,
+    "title": "Pokemon TCG Scarlet & Violet Elite Trainer Box",
+    "handle": "pokemon-sv-etb",
+    "vendor": "The Pokemon Company",
+    "product_type": "Trading Cards",
+    "variants": [
+      {
+        "id": 41234567890124,
+        "title": "Default Title",
+        "price": "49.95",
+        "sku": "PKM-SV-ETB-01",
+        "available": false,
+        "inventory_quantity": 0
+      }
+    ]
+  }
+}

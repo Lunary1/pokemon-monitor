@@ -1,0 +1,27 @@
+{
+  "product": {
+    "id": 7234567890125,
+    "title": "Pokemon TCG Paldea Evolved Booster Pack",
+    "handle": "pokemon-paldea-booster",
+    "vendor": "The Pokemon Company",
+    "product_type": "Trading Cards",
+    "variants": [
+      {
+        "id": 41234567890125,
+        "title": "Single Pack",
+        "price": "4.95",
+        "sku": "PKM-PE-SP",
+        "available": false,
+        "inventory_quantity": 0
+      },
+      {
+        "id": 41234567890126,
+        "title": "Booster Bundle",
+        "price": "29.95",
+        "sku": "PKM-PE-BB",
+        "available": true,
+        "inventory_quantity": 7
+      }
+    ]
+  }
+}
