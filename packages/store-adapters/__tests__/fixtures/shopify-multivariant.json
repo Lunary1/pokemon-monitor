@@ -1,27 +1,367 @@
 {
-  "product": {
-    "id": 7234567890125,
-    "title": "Pokemon TCG Paldea Evolved Booster Pack",
-    "handle": "pokemon-paldea-booster",
-    "vendor": "The Pokemon Company",
-    "product_type": "Trading Cards",
-    "variants": [
-      {
-        "id": 41234567890125,
-        "title": "Single Pack",
-        "price": "4.95",
-        "sku": "PKM-PE-SP",
-        "available": false,
-        "inventory_quantity": 0
-      },
-      {
-        "id": 41234567890126,
-        "title": "Booster Bundle",
-        "price": "29.95",
-        "sku": "PKM-PE-BB",
-        "available": true,
-        "inventory_quantity": 7
-      }
-    ]
-  }
+    "id":  15754445816152,
+    "title":  "MTG - Marvel Super Heroes Collector Commander Deck",
+    "handle":  "mtg-marvel-super-heroes-collector-commander-deck",
+    "description":  "\u003cdiv class=\"column\"\u003e\n\u003cdiv class=\"tab-control components-tab ui-tabs ui-corner-all ui-widget ui-widget-content\"\u003e\n\u003cdiv id=\"description\" aria-labelledby=\"ui-id-2\" role=\"tabpanel\" class=\"ui-tabs-panel ui-corner-bottom ui-widget-content\" aria-hidden=\"false\"\u003e\n\u003cdiv class=\"description fr-view\"\u003e\n\u003cspan\u003eSpeel Commander op het hoogste niveau met een speciaal volledig Surge Foil Magic: The Gathering | Marvel Super Heroes Collector’s Edition-deck. Verzamel alle Collector\u0027s Edition Magic: The Gathering - Marvel Super Heroes Commander decks: Avengers Assemble, Wakanda Forever, The Fantastic Four en Doom Prevails. Elk bevat 1 deck van 100 Surge Foil Magic-kaarten, 10 dubbelzijdige Surge Foil-tokenkaarten, 1 deckdoos (geschikt voor 100 kaarten met hoesje), 1 strategiegids en 1 referentiekaart. De decks The Avengers Assemble, Wakanda Forever en Doctor Doom bevatten elk 1 randloze kaart. Het deck The Fantastic Four bevat 4 randloze kaarten.\u003c/span\u003e\n\u003cul\u003e\n\u003cli\u003eKRIJG ALLE 4 COLLECTOR\u0027S EDITION-DECKS: Avengers Assemble, Wakanda Forever, The Fantastic Four en Doom Prevails\u003c/li\u003e\n\u003cli\u003eVERIJDEL MEER DAN ALLEEN DE PLANNEN VAN DE VIJAND: alle 100 kaarten in dit Collector\u0027s Edition-deck hebben een speciale Surge Foil-afwerking om je Commander-spellen naar een bovenmenselijk niveau te tillen\u003c/li\u003e\n\u003cli\u003eVERZAMEL DE MACHTIGSTE HELDEN EN SCHURKEN VAN DE WERELD: het Marvel-universum is met volle kracht gearriveerd! Stel je dreamteams van helden en schurken samen, geef ze iconische uitrusting en ontsluit hun vaardigheden die de wereld op zijn grondvesten zullen laten schudden\u003c/li\u003e\n\u003cli\u003e30 NIEUWE COMMANDER-KAARTEN: elk kant-en-klaar deck bevat 30 Commander-kaarten die geheel nieuw zijn in Magic: The Gathering\u003c/li\u003e\n\u003cli\u003eRANDLOZE COMMANDERS: commandeer je decks met een Legendary Creature-kaart met speciaal randloos artwork. De decks Avengers Assemble, Wakanda Forever en Doom Prevails bevatten elk 1 randloze kaart. Het deck The Fantastic Four bevat 4 randloze kaarten, 1 voor elk lid van het team!\u003c/li\u003e\n\u003cli\u003eEPISCHE MULTIPLAYER-GEVECHTEN: de populairste multiplayer-spelformule van Magic, Commander, is een free-for-all gevecht vol actie, strategische zetten en sociale intrige (het best met 3 tot 5 spelers)\u003c/li\u003e\n\u003cli\u003eINHOUD: MTG Marvel Super Heroes Commander-decks. Elk Surge Foil-deck van 100 kaarten bevat ook 10 dubbelzijdige Surge Foil-tokenkaarten, 1 deckdoos, 1 strategiegids en 1 referentiekaart\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/div\u003e\n\u003c/div\u003e\n\u003c/div\u003e\n\u003c/div\u003e",
+    "published_at":  "2026-05-14T09:22:01+02:00",
+    "created_at":  "2026-05-14T09:19:02+02:00",
+    "vendor":  "Wizards of the Coast",
+    "type":  "Card Game",
+    "tags":  [
+                 "Deck",
+                 "Engels",
+                 "Magic The Gathering",
+                 "Marvel Super Heroes",
+                 "Wizards of the Coast"
+             ],
+    "price":  18999,
+    "price_min":  18999,
+    "price_max":  18999,
+    "available":  true,
+    "price_varies":  false,
+    "compare_at_price":  null,
+    "compare_at_price_min":  0,
+    "compare_at_price_max":  0,
+    "compare_at_price_varies":  false,
+    "variants":  [
+                     {
+                         "id":  57289739338072,
+                         "title":  "Wakanda Forever",
+                         "option1":  "Wakanda Forever",
+                         "option2":  null,
+                         "option3":  null,
+                         "sku":  "0195166313085A",
+                         "requires_shipping":  true,
+                         "taxable":  true,
+                         "featured_image":  {
+                                                "id":  87950972027224,
+                                                "product_id":  15754445816152,
+                                                "position":  2,
+                                                "created_at":  "2026-05-14T09:20:13+02:00",
+                                                "updated_at":  "2026-05-14T09:20:15+02:00",
+                                                "alt":  null,
+                                                "width":  1024,
+                                                "height":  1024,
+                                                "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_2.jpg?v=1778743215",
+                                                "variant_ids":  [
+                                                                    57289739338072
+                                                                ]
+                                            },
+                         "available":  true,
+                         "name":  "MTG - Marvel Super Heroes Collector Commander Deck - Wakanda Forever",
+                         "public_title":  "Wakanda Forever",
+                         "options":  [
+                                         "Wakanda Forever"
+                                     ],
+                         "price":  18999,
+                         "weight":  100,
+                         "compare_at_price":  null,
+                         "inventory_management":  "shopify",
+                         "barcode":  "0195166313085A",
+                         "featured_media":  {
+                                                "alt":  null,
+                                                "id":  71279314075992,
+                                                "position":  2,
+                                                "preview_image":  {
+                                                                      "aspect_ratio":  1.0,
+                                                                      "height":  1024,
+                                                                      "width":  1024,
+                                                                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_2.jpg?v=1778743215"
+                                                                  }
+                                            },
+                         "quantity_rule":  {
+                                               "min":  1,
+                                               "max":  null,
+                                               "increment":  1
+                                           },
+                         "quantity_price_breaks":  [
+
+                                                   ],
+                         "requires_selling_plan":  false,
+                         "selling_plan_allocations":  [
+
+                                                      ]
+                     },
+                     {
+                         "id":  57289739370840,
+                         "title":  "The Fantastic Four",
+                         "option1":  "The Fantastic Four",
+                         "option2":  null,
+                         "option3":  null,
+                         "sku":  "0195166313085B",
+                         "requires_shipping":  true,
+                         "taxable":  true,
+                         "featured_image":  {
+                                                "id":  87950972289368,
+                                                "product_id":  15754445816152,
+                                                "position":  3,
+                                                "created_at":  "2026-05-14T09:20:17+02:00",
+                                                "updated_at":  "2026-05-14T09:20:20+02:00",
+                                                "alt":  null,
+                                                "width":  1024,
+                                                "height":  1024,
+                                                "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_3.jpg?v=1778743220",
+                                                "variant_ids":  [
+                                                                    57289739370840
+                                                                ]
+                                            },
+                         "available":  true,
+                         "name":  "MTG - Marvel Super Heroes Collector Commander Deck - The Fantastic Four",
+                         "public_title":  "The Fantastic Four",
+                         "options":  [
+                                         "The Fantastic Four"
+                                     ],
+                         "price":  18999,
+                         "weight":  100,
+                         "compare_at_price":  null,
+                         "inventory_management":  "shopify",
+                         "barcode":  "0195166313085B",
+                         "featured_media":  {
+                                                "alt":  null,
+                                                "id":  71279314174296,
+                                                "position":  3,
+                                                "preview_image":  {
+                                                                      "aspect_ratio":  1.0,
+                                                                      "height":  1024,
+                                                                      "width":  1024,
+                                                                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_3.jpg?v=1778743220"
+                                                                  }
+                                            },
+                         "quantity_rule":  {
+                                               "min":  1,
+                                               "max":  null,
+                                               "increment":  1
+                                           },
+                         "quantity_price_breaks":  [
+
+                                                   ],
+                         "requires_selling_plan":  false,
+                         "selling_plan_allocations":  [
+
+                                                      ]
+                     },
+                     {
+                         "id":  57289739403608,
+                         "title":  "Doom Prevails",
+                         "option1":  "Doom Prevails",
+                         "option2":  null,
+                         "option3":  null,
+                         "sku":  "0195166313085C",
+                         "requires_shipping":  true,
+                         "taxable":  true,
+                         "featured_image":  {
+                                                "id":  87950972944728,
+                                                "product_id":  15754445816152,
+                                                "position":  4,
+                                                "created_at":  "2026-05-14T09:20:21+02:00",
+                                                "updated_at":  "2026-05-14T09:20:24+02:00",
+                                                "alt":  null,
+                                                "width":  1024,
+                                                "height":  1024,
+                                                "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_4.jpg?v=1778743224",
+                                                "variant_ids":  [
+                                                                    57289739403608
+                                                                ]
+                                            },
+                         "available":  true,
+                         "name":  "MTG - Marvel Super Heroes Collector Commander Deck - Doom Prevails",
+                         "public_title":  "Doom Prevails",
+                         "options":  [
+                                         "Doom Prevails"
+                                     ],
+                         "price":  18999,
+                         "weight":  100,
+                         "compare_at_price":  null,
+                         "inventory_management":  "shopify",
+                         "barcode":  "0195166313085C",
+                         "featured_media":  {
+                                                "alt":  null,
+                                                "id":  71279314731352,
+                                                "position":  4,
+                                                "preview_image":  {
+                                                                      "aspect_ratio":  1.0,
+                                                                      "height":  1024,
+                                                                      "width":  1024,
+                                                                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_4.jpg?v=1778743224"
+                                                                  }
+                                            },
+                         "quantity_rule":  {
+                                               "min":  1,
+                                               "max":  null,
+                                               "increment":  1
+                                           },
+                         "quantity_price_breaks":  [
+
+                                                   ],
+                         "requires_selling_plan":  false,
+                         "selling_plan_allocations":  [
+
+                                                      ]
+                     },
+                     {
+                         "id":  57289739436376,
+                         "title":  "Avengers Assemble",
+                         "option1":  "Avengers Assemble",
+                         "option2":  null,
+                         "option3":  null,
+                         "sku":  "0195166313085D",
+                         "requires_shipping":  true,
+                         "taxable":  true,
+                         "featured_image":  {
+                                                "id":  87950973174104,
+                                                "product_id":  15754445816152,
+                                                "position":  5,
+                                                "created_at":  "2026-05-14T09:20:25+02:00",
+                                                "updated_at":  "2026-05-14T09:20:28+02:00",
+                                                "alt":  null,
+                                                "width":  1024,
+                                                "height":  1024,
+                                                "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_5.jpg?v=1778743228",
+                                                "variant_ids":  [
+                                                                    57289739436376
+                                                                ]
+                                            },
+                         "available":  false,
+                         "name":  "MTG - Marvel Super Heroes Collector Commander Deck - Avengers Assemble",
+                         "public_title":  "Avengers Assemble",
+                         "options":  [
+                                         "Avengers Assemble"
+                                     ],
+                         "price":  18999,
+                         "weight":  100,
+                         "compare_at_price":  null,
+                         "inventory_management":  "shopify",
+                         "barcode":  "0195166313085D",
+                         "featured_media":  {
+                                                "alt":  null,
+                                                "id":  71279314829656,
+                                                "position":  5,
+                                                "preview_image":  {
+                                                                      "aspect_ratio":  1.0,
+                                                                      "height":  1024,
+                                                                      "width":  1024,
+                                                                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_5.jpg?v=1778743228"
+                                                                  }
+                                            },
+                         "quantity_rule":  {
+                                               "min":  1,
+                                               "max":  null,
+                                               "increment":  1
+                                           },
+                         "quantity_price_breaks":  [
+
+                                                   ],
+                         "requires_selling_plan":  false,
+                         "selling_plan_allocations":  [
+
+                                                      ]
+                     }
+                 ],
+    "images":  [
+                   "//cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_1.jpg?v=1778743210",
+                   "//cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_2.jpg?v=1778743215",
+                   "//cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_3.jpg?v=1778743220",
+                   "//cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_4.jpg?v=1778743224",
+                   "//cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_5.jpg?v=1778743228"
+               ],
+    "featured_image":  "//cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_1.jpg?v=1778743210",
+    "options":  [
+                    {
+                        "name":  "Variant",
+                        "position":  1,
+                        "values":  [
+                                       "Wakanda Forever",
+                                       "The Fantastic Four",
+                                       "Doom Prevails",
+                                       "Avengers Assemble"
+                                   ]
+                    }
+                ],
+    "url":  "/products/mtg-marvel-super-heroes-collector-commander-deck",
+    "media":  [
+                  {
+                      "alt":  null,
+                      "id":  71279313977688,
+                      "position":  1,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1024,
+                                            "width":  1024,
+                                            "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_1.jpg?v=1778743210"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1024,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_1.jpg?v=1778743210",
+                      "width":  1024
+                  },
+                  {
+                      "alt":  null,
+                      "id":  71279314075992,
+                      "position":  2,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1024,
+                                            "width":  1024,
+                                            "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_2.jpg?v=1778743215"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1024,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_2.jpg?v=1778743215",
+                      "width":  1024
+                  },
+                  {
+                      "alt":  null,
+                      "id":  71279314174296,
+                      "position":  3,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1024,
+                                            "width":  1024,
+                                            "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_3.jpg?v=1778743220"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1024,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_3.jpg?v=1778743220",
+                      "width":  1024
+                  },
+                  {
+                      "alt":  null,
+                      "id":  71279314731352,
+                      "position":  4,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1024,
+                                            "width":  1024,
+                                            "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_4.jpg?v=1778743224"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1024,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_4.jpg?v=1778743224",
+                      "width":  1024
+                  },
+                  {
+                      "alt":  null,
+                      "id":  71279314829656,
+                      "position":  5,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1024,
+                                            "width":  1024,
+                                            "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_5.jpg?v=1778743228"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1024,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/2203/7225/files/woc_20d53620_5.jpg?v=1778743228",
+                      "width":  1024
+                  }
+              ],
+    "requires_selling_plan":  false,
+    "selling_plan_groups":  [
+
+                            ]
 }

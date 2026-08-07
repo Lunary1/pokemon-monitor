@@ -1,19 +1,94 @@
 {
-  "product": {
-    "id": 7234567890123,
-    "title": "Pokemon TCG Scarlet & Violet Booster Box",
-    "handle": "pokemon-sv-booster-box",
-    "vendor": "The Pokemon Company",
-    "product_type": "Trading Cards",
-    "variants": [
-      {
-        "id": 41234567890123,
-        "title": "Default Title",
-        "price": "159.95",
-        "sku": "PKM-SV-BB-01",
-        "available": true,
-        "inventory_quantity": 12
-      }
-    ]
-  }
+    "id":  15642758971657,
+    "title":  "Pokémon TCG - Storm Emeralda Japanse Booster Box",
+    "handle":  "pokemon-tcg-storm-emeralda-japanse-booster-box",
+    "description":  "\u003cp\u003e\u003cstrong style=\"font-size: 0.875rem;\"\u003ePokémon Trading Card Game - Storm Emeralda Box . Een set met veel gave \u0026amp; nieuwe pulls.\u003c/strong\u003e\u003c/p\u003e\n\u003cp class=\"isSelectedEnd\"\u003e\u003cspan\u003eDe absolute blikvanger is \u003c/span\u003eMega Rayquaza ex, een Colorless Mega Evolution met een krachtige Ability die Energie versnelt en een aanval die meer schade doet naarmate er meer Fire- en Lightning-Energy aan je Pokémon zijn gekoppeld. Daarnaast introduceert Storm Emeralda de nieuwe Legendary Stadium-kaarten\u003cspan\u003e, die uit twee helften bestaan en samen één krachtig Stadium vormen.\u003c/span\u003e\u003c/p\u003e\n\u003cp\u003e\u003cspan\u003e\u003cstrong\u003eDe Pokémon TCG - Storm Emeralda Booster Box bevat:\u003c/strong\u003e\u003c/span\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e30 Pokémon TCG: Storm Emeralda boosterpacks\u003c/li\u003e\n\u003cli\u003eElke Boosterpack bevat 5 kaarten\u003c/li\u003e\n\u003c/ul\u003e",
+    "published_at":  "2026-08-01T22:31:12+02:00",
+    "created_at":  "2026-08-01T22:19:31+02:00",
+    "vendor":  "TcgReus",
+    "type":  "",
+    "tags":  [
+
+             ],
+    "price":  18495,
+    "price_min":  18495,
+    "price_max":  18495,
+    "available":  true,
+    "price_varies":  false,
+    "compare_at_price":  null,
+    "compare_at_price_min":  0,
+    "compare_at_price_max":  0,
+    "compare_at_price_varies":  false,
+    "variants":  [
+                     {
+                         "id":  57232796942601,
+                         "title":  "Default Title",
+                         "option1":  "Default Title",
+                         "option2":  null,
+                         "option3":  null,
+                         "sku":  null,
+                         "requires_shipping":  true,
+                         "taxable":  true,
+                         "featured_image":  null,
+                         "available":  true,
+                         "name":  "Pokémon TCG - Storm Emeralda Japanse Booster Box",
+                         "public_title":  null,
+                         "options":  [
+                                         "Default Title"
+                                     ],
+                         "price":  18495,
+                         "weight":  500,
+                         "compare_at_price":  null,
+                         "inventory_management":  "shopify",
+                         "barcode":  "4521329462233",
+                         "quantity_rule":  {
+                                               "min":  1,
+                                               "max":  null,
+                                               "increment":  1
+                                           },
+                         "quantity_price_breaks":  [
+
+                                                   ],
+                         "requires_selling_plan":  false,
+                         "selling_plan_allocations":  [
+
+                                                      ]
+                     }
+                 ],
+    "images":  [
+                   "//cdn.shopify.com/s/files/1/0697/9708/5449/files/Pokemon_TCG_-_Storm_Emeralda_Japanse_Booster_Box_-_TcgReus.webp?v=1785616413"
+               ],
+    "featured_image":  "//cdn.shopify.com/s/files/1/0697/9708/5449/files/Pokemon_TCG_-_Storm_Emeralda_Japanse_Booster_Box_-_TcgReus.webp?v=1785616413",
+    "options":  [
+                    {
+                        "name":  "Title",
+                        "position":  1,
+                        "values":  [
+                                       "Default Title"
+                                   ]
+                    }
+                ],
+    "url":  "/products/pokemon-tcg-storm-emeralda-japanse-booster-box",
+    "media":  [
+                  {
+                      "alt":  null,
+                      "id":  69351440318729,
+                      "position":  1,
+                      "preview_image":  {
+                                            "aspect_ratio":  1.0,
+                                            "height":  1000,
+                                            "width":  1000,
+                                            "src":  "https://cdn.shopify.com/s/files/1/0697/9708/5449/files/Pokemon_TCG_-_Storm_Emeralda_Japanse_Booster_Box_-_TcgReus.webp?v=1785616413"
+                                        },
+                      "aspect_ratio":  1.0,
+                      "height":  1000,
+                      "media_type":  "image",
+                      "src":  "https://cdn.shopify.com/s/files/1/0697/9708/5449/files/Pokemon_TCG_-_Storm_Emeralda_Japanse_Booster_Box_-_TcgReus.webp?v=1785616413",
+                      "width":  1000
+                  }
+              ],
+    "requires_selling_plan":  false,
+    "selling_plan_groups":  [
+
+                            ]
 }

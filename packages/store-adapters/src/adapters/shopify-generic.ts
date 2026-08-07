@@ -12,14 +12,27 @@ const DEFAULT_CURRENCY = 'EUR';
 
 interface ShopifyVariant {
   available?: boolean;
-  price?: string | number;
+  price?: number;
 }
 
-interface ShopifyProductResponse {
-  product?: {
-    title?: string;
-    variants?: ShopifyVariant[];
-  };
+/**
+ * Shape of `/products/{handle}.js`. Unlike the `.json` detail endpoint, this
+ * one carries `available` — see the class doc and #88.
+ */
+interface ShopifyJsProduct {
+  title?: string;
+  variants?: ShopifyVariant[];
+}
+
+/**
+ * `.js` reports prices as integer minor units (18495 = €184.95). A price we
+ * cannot read is reported as null rather than guessed — unlike availability it
+ * isn't load-bearing for restock detection, so it doesn't warrant an error
+ * result.
+ */
+function parsePrice(price: number | undefined): number | null {
+  if (typeof price !== 'number' || !Number.isFinite(price)) return null;
+  return price / 100;
 }
 
 export class ShopifyProductUrlError extends Error {
@@ -34,7 +47,7 @@ export class ShopifyProductUrlError extends Error {
  *
  * Handles the shapes Shopify actually serves: a bare product URL, one nested
  * under a collection, one with a trailing segment or query string, and one
- * that already points at the .json endpoint.
+ * that already points at an endpoint suffix (`.json` or `.js`).
  */
 export function extractShopifyHandle(url: string): string {
   const { pathname } = new URL(url);
@@ -44,13 +57,21 @@ export function extractShopifyHandle(url: string): string {
   const handle = productsIndex === -1 ? undefined : segments[productsIndex + 1];
   if (!handle) throw new ShopifyProductUrlError(url);
 
-  return handle.replace(/\.json$/, '');
+  return handle.replace(/\.(json|js)$/, '');
 }
 
 /**
  * Generic adapter for any Shopify storefront, using the public
- * `/products/{handle}.json` endpoint (plan §5: always prefer this over HTML
- * scraping).
+ * `/products/{handle}.js` endpoint (plan §5: always prefer a JSON endpoint
+ * over HTML scraping).
+ *
+ * `.js` rather than the more obvious `.json`: the `.json` detail endpoint
+ * omits `available` entirely (verified on three independent storefronts),
+ * which made every product read as out of stock (#88). Two consequences of
+ * that endpoint choice, both handled below:
+ *
+ * - prices are integer minor units (18495 = €184.95), not decimal strings;
+ * - there is no currency field, so `DEFAULT_CURRENCY` stands.
  *
  * Unlike the single-store adapters, this one serves many domains, so the
  * request origin comes from the product URL rather than `config.baseUrl` —
@@ -83,21 +104,16 @@ export class ShopifyGenericAdapter implements StoreAdapter {
       const { origin } = new URL(url);
       const handle = extractShopifyHandle(url);
 
-      const body = await got(`${origin}/products/${handle}.json`, {
+      const product = await got(`${origin}/products/${handle}.js`, {
         timeout: { request: options?.timeoutMs ?? this.config.defaultTimeoutMs },
         headers: {
           'User-Agent': options?.userAgent ?? 'Mozilla/5.0 (personal stock monitor)',
           ...(options?.customHeaders ?? this.config.customHeaders),
         },
         followRedirect: true,
-      }).json<ShopifyProductResponse>();
+      }).json<ShopifyJsProduct>();
 
-      const product = body?.product;
-      if (!product) {
-        throw new Error('response did not contain a product object');
-      }
-
-      const variants = product.variants ?? [];
+      const variants = product?.variants ?? [];
       if (variants.length === 0) {
         throw new Error('product has no variants');
       }
@@ -105,17 +121,24 @@ export class ShopifyGenericAdapter implements StoreAdapter {
       // Prefer an available variant so a product with any purchasable variant
       // reads as in stock; fall back to the first so price still reports when
       // everything is sold out.
-      const variant = variants.find((candidate) => candidate.available) ?? variants[0];
+      const variant = variants.find((candidate) => candidate.available === true) ?? variants[0];
 
-      const parsedPrice =
-        variant.price === undefined ? NaN : parseFloat(String(variant.price));
+      // The invariant from #86, applied here: availability we cannot read is an
+      // error, never a silent `inStock: false`. Reporting a missing field as
+      // out-of-stock is indistinguishable from a genuine sell-out, which is the
+      // exact bug this adapter shipped with (#88).
+      if (typeof variant.available !== 'boolean') {
+        throw new Error(
+          'variant has no boolean availability field (is this the .json detail endpoint?)',
+        );
+      }
 
       return {
-        inStock: variant.available === true,
-        price: Number.isNaN(parsedPrice) ? null : parsedPrice,
+        inStock: variant.available,
+        price: parsePrice(variant.price),
         currency: DEFAULT_CURRENCY,
         title: product.title,
-        availability: variant.available === true ? 'In stock' : 'Out of stock',
+        availability: variant.available ? 'In stock' : 'Out of stock',
         checkedAt,
       };
     } catch (err) {
