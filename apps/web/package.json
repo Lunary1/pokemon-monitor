@@ -1,0 +1,30 @@
+{
+  "name": "@pokemon-monitor/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- next dev",
+    "build": "dotenv -e ../../.env -- next build",
+    "start": "dotenv -e ../../.env -- next start",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "e2e": "dotenv -e ../../.env -- playwright test",
+    "e2e:seed": "dotenv -e ../../.env -- tsx e2e/seed.ts"
+  },
+  "dependencies": {
+    "@pokemon-monitor/core": "0.1.0",
+    "@pokemon-monitor/db": "0.1.0",
+    "@pokemon-monitor/notifications": "0.1.0",
+    "@pokemon-monitor/playwright-helper": "0.1.0",
+    "@pokemon-monitor/store-adapters": "0.1.0",
+    "next": "^16.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^19.2.4",
+    "tsx": "^4.19.2"
+  }
+}

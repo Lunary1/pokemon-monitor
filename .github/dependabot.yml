@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    # Major version bumps are intentionally left ungrouped so each lands as
+    # its own PR - per docs/SDLC.md Section 7, a major bump needs a design
+    # note before merge, not an auto-mergeable group.

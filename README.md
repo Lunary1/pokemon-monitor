@@ -9,8 +9,8 @@ TypeScript/Node.js worker, PostgreSQL storage, and a simple dashboard later.
 
 ## Phase 1
 
-- Set up a pnpm monorepo with database, store adapter, and monitor worker packages.
-- Implement a ToyChamp stock adapter using lightweight HTTP fetching and HTML parsing.
+- Set up a npm monorepo with database, store adapter, and monitor worker packages.
+- Implement a Dreamland stock adapter using lightweight HTTP fetching and HTML parsing.
 - Persist stock checks and stock transition events in PostgreSQL.
 
 ## Intended Use

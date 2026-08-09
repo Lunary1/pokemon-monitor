@@ -1,0 +1,15 @@
+# Review routing for pokemon-monitor.
+#
+# Solo-maintained today (docs/SDLC.md §3): everything routes to @Lunary1.
+# The store-adapters and schema paths are called out explicitly per
+# docs/SDLC.md §3 ("requires CODEOWNERS to route reviews") so that once a
+# second contributor joins, routing those higher-risk paths to whoever
+# didn't write the change is a one-line owner swap instead of a new file.
+
+* @Lunary1
+
+# Highest-churn, highest-risk: adapters break on store HTML changes.
+/packages/store-adapters/ @Lunary1
+
+# Schema changes get read twice per docs/SDLC.md §5 "Code review".
+/packages/db/prisma/ @Lunary1

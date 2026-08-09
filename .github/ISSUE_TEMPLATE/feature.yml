@@ -1,0 +1,59 @@
+name: Feature / Idea
+description: Propose a new feature, adapter, or enhancement. Required fields enforce the Phase 0 scope gate (docs/SDLC.md).
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem statement
+      description: 3-5 lines - what triggers this, and what does "done" look like? (docs/SDLC.md Phase 0)
+      placeholder: |
+        What: ...
+        Why now: ...
+        Done when: ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: XS <1h, S <1 day, M spans files/1 package, L spans packages or schema. Apply the matching size/* label after creating the issue.
+      options:
+        - XS - Trivial, <1h
+        - S - Small, <1 day
+        - M - Medium, spans files/1 package
+        - L - Large, spans packages or schema
+    validations:
+      required: true
+
+  - type: dropdown
+    id: moscow
+    attributes:
+      label: MoSCoW priority
+      description: Per plan Section 16. Apply the matching label after creating the issue.
+      options:
+        - Must-Have (MVP)
+        - Should-Have
+        - Could-Have
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: exclusion-check
+    attributes:
+      label: Exclusion list check
+      description: plan Section 1 "What Makes It Too Complex" and Section 16 "Won't-Have" - auth, multi-user, checkout automation, proxy rotation, CAPTCHA bypass, stealth plugins, a queue before it's needed, a plugin/adapter marketplace, real-time WebSockets.
+      options:
+        - label: I checked this request against the exclusion lists above. If it matches one, I've said so explicitly in the problem statement and why an override is warranted.
+          required: true
+
+  - type: textarea
+    id: design-note
+    attributes:
+      label: Design note (M/L only, or new adapter/schema/API route)
+      description: Required for M/L work, new adapters (which data-source tier - JSON API > embedded JSON > HTML scraping > Playwright, per plan Section 5/10), schema changes (additive or destructive?), or new API routes. Leave blank for XS/S work that doesn't touch these.
+    validations:
+      required: false

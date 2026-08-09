@@ -8,6 +8,12 @@ build/
 .next/
 out/
 coverage/
+.turbo/
+.vercel/
+
+# Next.js generated agent instruction files
+apps/*/AGENTS.md
+apps/*/CLAUDE.md
 
 # TypeScript
 *.tsbuildinfo

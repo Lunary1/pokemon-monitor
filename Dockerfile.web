@@ -1,0 +1,13 @@
+FROM node:22-slim AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json package-lock.json ./
+COPY apps/web/package.json apps/web/package.json
+COPY packages packages
+RUN npm ci
+
+FROM deps AS runner
+COPY . .
+EXPOSE 3000
+CMD ["npm", "run", "dev", "--workspace", "@pokemon-monitor/web"]
