@@ -2,7 +2,7 @@
 
 The reference to follow at 2am when something's broken. Companion to `docs/SDLC.md` §9 (Observability and Operations) — that doc defines *what* to watch and the high-level incident response loop (detect → triage → contain → fix → verify → log); this doc is the concrete "I'm looking at X, now what" reference for the four things that can silently fail: **worker, API/dashboard, database, notification path**.
 
-> **Status note:** `/api/health` is implemented as described below (#12). The `ErrorLog`-writing paths are **not** yet — nothing writes to the `ErrorLog` table, so any instruction below to "check `ErrorLog`" currently means falling back to Railway service logs and `docker compose logs` locally. Tracked in `docs/RISK_REGISTER.md`.
+> **Status note:** `/api/health` is implemented as described below (#12), and the dashboard **log viewer at `/logs`** is live (#36) — filter by source and level there rather than querying the table by hand. `ErrorLog` writes are **partial**: notification dispatch failures write rows (`source: notification`), but adapter and worker error paths do not yet, so an instruction below to check `ErrorLog` for `source: adapter:<key>` still means falling back to Railway service logs and `docker compose logs` locally. Tracked in `docs/RISK_REGISTER.md`.
 
 ## Reading `/api/health`
 
@@ -48,6 +48,23 @@ Because the endpoint returns 200 in every state, a plain HTTP(s) monitor only ca
 Keyword matching is on the raw response body, so match the exact JSON with no spaces around the colon.
 
 > The `"db":"ok"` monitor is phrased as *absence* on purpose. Matching for `"db":"error"` would go silent if the response shape ever changed, and a monitor that fails open is worse than none — it reports healthy precisely when it has stopped understanding the response.
+
+## Reading the log viewer (`/logs`)
+
+The dashboard page at `/logs` lists `ErrorLog` newest-first, filterable by level (`INFO`/`WARN`/`ERROR`) and by source. Each row shows its `context` JSON inline and its stack trace behind a collapsible toggle. The same data is available as JSON at `GET /api/logs?source=&level=&page=` if you'd rather grep it.
+
+### Purging old logs
+
+The viewer is **read-only** — there is deliberately no purge button, because the dashboard is unauthenticated (auth is excluded per plan §1) and this deletion is irreversible. Purge from a shell instead:
+
+```bash
+curl -X DELETE "https://<host>/api/logs?olderThanDays=30"
+# → {"deleted":128,"cutoff":"2026-07-10T12:00:00.000Z"}
+```
+
+`olderThanDays` is required and must be positive — a bare `DELETE /api/logs` returns 400 and deletes nothing, so a mistyped command can't wipe the table. Check the returned `cutoff` before assuming the right window was applied.
+
+> This purges `ErrorLog` only. `StockCheck` retention is a separate, currently unimplemented concern (#95).
 
 ## Common failure signatures
 
