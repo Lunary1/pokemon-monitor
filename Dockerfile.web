@@ -1,13 +1,35 @@
+# Built remotely by Railway from this Dockerfile; the database is the Railway
+# Postgres service, reached via the DATABASE_URL the platform injects.
 FROM node:22-slim AS base
 WORKDIR /app
+
+# openssl is required by Prisma's query engine at both generate and run time.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/package.json
+COPY workers/monitor/package.json workers/monitor/package.json
 COPY packages packages
+# `npm ci` runs the root postinstall, which generates the Prisma client. That
+# needs the schema, hence `packages` being copied above this line.
 RUN npm ci
 
-FROM deps AS runner
+FROM deps AS builder
 COPY . .
+# No live database is needed here: every route is `force-dynamic`, so nothing
+# is prerendered at build time. Prisma still requires DATABASE_URL to be a
+# parseable URL, so a placeholder stands in — the real value is injected by
+# Railway at runtime and this one never reaches a connection.
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build --workspace @pokemon-monitor/web
+
+FROM builder AS runner
+ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["npm", "run", "dev", "--workspace", "@pokemon-monitor/web"]
+# `next start` serves the build produced above, rather than `next dev` — the
+# dev server has no build step and is not production-viable (#97).
+CMD ["npm", "run", "start", "--workspace", "@pokemon-monitor/web"]
