@@ -175,12 +175,18 @@ describe('dispatch', () => {
 
     const before = Date.now();
     await dispatch(makeEvent());
+    const after = Date.now();
 
     const cooldownCall = findFirstNotification.mock.calls[1][0];
     const gte = cooldownCall.where.createdAt.gte as Date;
-    // 60s window, allowing a little slack for execution time.
-    expect(before - gte.getTime()).toBeGreaterThanOrEqual(60_000);
-    expect(before - gte.getTime()).toBeLessThan(65_000);
+    // The cutoff is `dispatch`'s own Date.now() minus the 60s window, and that
+    // clock reading sits somewhere in [before, after]. Bracketing it against
+    // both ends is what makes this exact rather than timing-dependent:
+    // comparing only against `before` asserts the window is >= 60s when any
+    // elapsed time inside dispatch necessarily makes it smaller, so it only
+    // passed when the two readings landed on the same millisecond.
+    expect(gte.getTime()).toBeGreaterThanOrEqual(before - 60_000);
+    expect(gte.getTime()).toBeLessThanOrEqual(after - 60_000);
   });
 
   test('records FAILED without throwing when the webhook send fails', async () => {

@@ -29,10 +29,24 @@ const OUT_OF_STOCK_VALUES = new Set([
   'Discontinued',
 ]);
 
+/**
+ * Why the parse failed.
+ *
+ * `absent` — no usable Product markup on the page, so a caller with another
+ * data source may reasonably try it.
+ * `unreadable` — Product markup is present but says something we cannot map.
+ * That is a definite unknown: a caller must surface it rather than fall back
+ * to a weaker signal that might silently disagree.
+ */
+export type JsonLdFailureKind = 'absent' | 'unreadable';
+
 export class JsonLdParseError extends Error {
-  constructor(message: string) {
+  readonly kind: JsonLdFailureKind;
+
+  constructor(message: string, kind: JsonLdFailureKind = 'unreadable') {
     super(message);
     this.name = 'JsonLdParseError';
+    this.kind = kind;
   }
 }
 
@@ -45,10 +59,21 @@ export interface JsonLdProduct {
   availability: string;
 }
 
+interface RawPriceSpecification {
+  price?: string | number;
+  priceCurrency?: string;
+}
+
 interface RawOffer {
   price?: string | number;
   priceCurrency?: string;
   availability?: string;
+  /**
+   * WooCommerce puts price and currency here rather than on the offer itself.
+   * Verified on a live capture (tcgfanz.nl, 2026-08-09), where reading only
+   * `offer.price` yielded null for every product.
+   */
+  priceSpecification?: RawPriceSpecification | RawPriceSpecification[];
 }
 
 interface RawProduct {
@@ -92,7 +117,7 @@ function findProductNode(parsed: unknown): RawProduct | null {
 export function parseProductJsonLd($: CheerioAPI): JsonLdProduct {
   const blocks = $('script[type="application/ld+json"]');
   if (blocks.length === 0) {
-    throw new JsonLdParseError('no application/ld+json block found on page');
+    throw new JsonLdParseError('no application/ld+json block found on page', 'absent');
   }
 
   let product: RawProduct | null = null;
@@ -112,7 +137,7 @@ export function parseProductJsonLd($: CheerioAPI): JsonLdProduct {
   }
 
   if (!product) {
-    throw new JsonLdParseError('no JSON-LD node with @type Product found');
+    throw new JsonLdParseError('no JSON-LD node with @type Product found', 'absent');
   }
 
   const offer = Array.isArray(product.offers) ? product.offers[0] : product.offers;
@@ -134,14 +159,22 @@ export function parseProductJsonLd($: CheerioAPI): JsonLdProduct {
     throw new JsonLdParseError(`unrecognised availability value: ${availability}`);
   }
 
-  const parsedPrice =
-    offer.price === undefined ? NaN : parseFloat(String(offer.price));
+  // Price may sit directly on the offer (Dreamland) or nested in a
+  // priceSpecification (WooCommerce). Unlike availability, an unreadable price
+  // degrades to null rather than failing the check — it isn't load-bearing for
+  // restock detection.
+  const specification = Array.isArray(offer.priceSpecification)
+    ? offer.priceSpecification[0]
+    : offer.priceSpecification;
+
+  const rawPrice = offer.price ?? specification?.price;
+  const parsedPrice = rawPrice === undefined ? NaN : parseFloat(String(rawPrice));
 
   return {
     name: product.name,
     inStock,
     price: Number.isNaN(parsedPrice) ? null : parsedPrice,
-    currency: offer.priceCurrency ?? 'EUR',
+    currency: offer.priceCurrency ?? specification?.priceCurrency ?? 'EUR',
     availability,
   };
 }
