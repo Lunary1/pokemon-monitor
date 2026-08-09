@@ -2,29 +2,52 @@
 
 The reference to follow at 2am when something's broken. Companion to `docs/SDLC.md` §9 (Observability and Operations) — that doc defines *what* to watch and the high-level incident response loop (detect → triage → contain → fix → verify → log); this doc is the concrete "I'm looking at X, now what" reference for the four things that can silently fail: **worker, API/dashboard, database, notification path**.
 
-> **Status note:** `/api/health` and the `ErrorLog`-writing paths described below are not implemented yet (tracked in `docs/RISK_REGISTER.md` — "Worker crashes silently" is currently **Not implemented**). This runbook documents the intended contract per plan §11/§14 so the health-check and log-reading sections are ready the moment that work lands; until then, "check `/api/health`" means "this check isn't available yet — fall back to Railway service logs and `docker compose logs` locally."
+> **Status note:** `/api/health` is implemented as described below (#12). The `ErrorLog`-writing paths are **not** yet — nothing writes to the `ErrorLog` table, so any instruction below to "check `ErrorLog`" currently means falling back to Railway service logs and `docker compose logs` locally. Tracked in `docs/RISK_REGISTER.md`.
 
 ## Reading `/api/health`
 
-Intended shape (plan §14 "Health Checks", plan §11 "System" API):
+Shape (plan §14 "Health Checks", plan §11 "System" API):
 
 ```json
 {
   "worker": "running",
   "db": "ok",
-  "lastCheck": "2026-08-05T14:32:00.000Z"
+  "lastCheck": "2026-08-05T14:32:00.000Z",
+  "stale": false
 }
 ```
 
 | Field | Healthy value | What it means |
 |---|---|---|
-| `worker` | `"running"` | The monitor worker process is alive and has completed at least one check cycle recently |
+| `worker` | `"running"` | The monitor worker is keeping up. Reported as `"degraded"` whenever `stale` is true |
 | `db` | `"ok"` | The web process can reach PostgreSQL |
-| `lastCheck` | A recent ISO timestamp | The time of the most recent `StockCheck` row written by the worker, across all enabled stores |
+| `lastCheck` | A recent ISO timestamp | The most recent `StockCheck` across enabled products in enabled stores. `null` when no check has ever run |
+| `stale` | `false` | Whether `lastCheck` has fallen outside the staleness threshold below |
 
-**Staleness rule** (`docs/SDLC.md` §9): `lastCheck` is **stale** if it is older than **2x the shortest `pollingInterval` among currently enabled `Store` rows**. Stale `lastCheck` with `worker: "running"` still reported is itself a symptom (see the failure table below) — a well-formed response doesn't necessarily mean the worker is doing useful work.
+**Staleness rule** (`docs/SDLC.md` §9): `lastCheck` is **stale** if it is older than **2x the shortest `pollingInterval` among currently enabled `Store` rows**. This is computed by the endpoint itself — `stale` is the field to watch, not something to work out by hand at 2am.
 
-UptimeRobot (or equivalent) should ping `/api/health` every 5 minutes and alert via a channel independent of this app's own Discord webhook — a fully-down app can't alert you through itself.
+Two cases deliberately report `stale: false` rather than alerting, so a quiet signal stays trustworthy:
+
+- **`lastCheck: null`** — no check has ever run. A fresh deploy hasn't fallen behind, it hasn't started. Alerting here would fire on every clean deploy.
+- **No enabled stores** — nothing is scheduled, so there is no cadence to be behind.
+
+**The endpoint returns HTTP 200 whenever the `web` process is serving**, including when `stale: true` or `db: "error"`. That is deliberate: a non-200 means "the web service itself is down", which is a different incident with a different fix than "the worker is behind" or "Postgres is unreachable" (see the failure table below). **So a 200 alone tells you nothing — you must match on the body.**
+
+### Configuring the UptimeRobot check
+
+Ping `/api/health` every 5 minutes and alert via a channel independent of this app's own Discord webhook — a fully-down app can't alert you through itself.
+
+Because the endpoint returns 200 in every state, a plain HTTP(s) monitor only catches a fully-down `web` service. Add two **Keyword** monitors alongside it:
+
+| Monitor type | Setting | Catches |
+|---|---|---|
+| HTTP(s) | URL `https://<host>/api/health` | `web` service down or unreachable |
+| Keyword | Keyword `"stale":true`, alert **when keyword exists** | Worker crashed, stuck, or crash-looping |
+| Keyword | Keyword `"db":"ok"`, alert **when keyword does not exist** | Postgres unreachable |
+
+Keyword matching is on the raw response body, so match the exact JSON with no spaces around the colon.
+
+> The `"db":"ok"` monitor is phrased as *absence* on purpose. Matching for `"db":"error"` would go silent if the response shape ever changed, and a monitor that fails open is worse than none — it reports healthy precisely when it has stopped understanding the response.
 
 ## Common failure signatures
 
