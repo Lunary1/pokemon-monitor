@@ -37,6 +37,35 @@ regression is pinned directly in `shopify-generic.test.ts` instead, by a test
 that feeds a `.json`-shaped payload (no `available` field) to the adapter and
 asserts an `ERROR:` result.
 
+## WooCommerce (`woocommerce-*.html`)
+
+Captured from `tcgfanz.nl` (a real WooCommerce storefront) on 2026-08-09. In
+each file the `application/ld+json` block and the price/stock paragraphs are
+verbatim; the product wrapper, title and summary container reproduce the real
+element and class structure, with the surrounding ~200-250KB of theme markup,
+scripts and reviews removed.
+
+| Fixture | Source | Captured state |
+|---|---|---|
+| `woocommerce-instock.html` | Eevee #135 (Twilight Masquerade) | `InStock`, `instock` wrapper class, €2,00, variable product |
+| `woocommerce-outofstock.html` | Suicune Pokémon Center Fit Knuffel | `OutOfStock`, `outofstock` wrapper class + `<p class="stock out-of-stock">Uitverkocht</p>`, €24,99 |
+| `woocommerce-nojsonld-*.html` | Same two pages, JSON-LD stripped | Stands in for a store with structured data disabled — exercises the `SELECTORS` fallback |
+
+Two things these captures pinned that a handwritten fixture would have missed,
+both found by capturing before writing the adapter rather than after:
+
+1. **WooCommerce nests price under `offers[].priceSpecification[]`**, not on the
+   offer itself. `parseProductJsonLd` read only `offer.price` and returned
+   `price: null` for every WooCommerce product while availability parsed fine —
+   the same shape of silent wrongness as #88, just in a non-load-bearing field.
+2. **There is no `itemprop="price"` anywhere on the page**, and the price block
+   carries a theme-specific class (`p.price.nasa-single-product-price`). The
+   selector fallback reads the rendered `.woocommerce-Price-amount` text and its
+   currency symbol instead, and parses `€ 24,99` comma-decimal formatting.
+
+Only `nojsonld` variants are derived rather than captured, and they are derived
+by deletion only — no markup was added or edited.
+
 ## Dreamland (`dreamland-*.html`)
 
 Built around a verbatim JSON-LD payload captured from a real product page; see
