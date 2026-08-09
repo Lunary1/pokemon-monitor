@@ -1,5 +1,6 @@
 import { DreamlandAdapter } from './adapters/dreamland';
 import { ShopifyGenericAdapter } from './adapters/shopify-generic';
+import { WooCommerceAdapter } from './adapters/woocommerce';
 import type { StoreAdapter } from './types';
 
 export { DreamlandAdapter } from './adapters/dreamland';
@@ -9,8 +10,13 @@ export {
   extractShopifyHandle,
 } from './adapters/shopify-generic';
 export { ToyChampAdapter } from './adapters/toychamp';
+export {
+  WooCommerceAdapter,
+  WooCommerceParseError,
+  parseWooPrice,
+} from './adapters/woocommerce';
 export { parseProductJsonLd, JsonLdParseError } from './jsonld';
-export type { JsonLdProduct } from './jsonld';
+export type { JsonLdFailureKind, JsonLdProduct } from './jsonld';
 export {
   parseAdapterOverrides,
   resolveAdapterConfig,
@@ -34,6 +40,7 @@ const adapters: Record<string, StoreAdapter> = {
   dreamland,
   toychamp: dreamland,
   'shopify-generic': new ShopifyGenericAdapter(),
+  woocommerce: new WooCommerceAdapter(),
 };
 
 export function getAdapter(key: string): StoreAdapter | undefined {
