@@ -1,0 +1,36 @@
+# Host-built dependencies: native modules (Prisma engines, esbuild) are compiled
+# for the host platform and would be silently wrong inside the image. `npm ci`
+# installs them fresh for the target platform instead.
+node_modules
+**/node_modules
+
+# Secrets. `.env` is gitignored, so it is absent from a clean checkout — but a
+# developer building locally has one, and `COPY . .` would bake it into the
+# image. Excluded here so that cannot happen regardless of who builds.
+.env
+.env.*
+!.env.example
+
+# Build artifacts, rebuilt inside the image. A stale host `.next` copied in
+# would shadow the one `next build` produces.
+.next
+**/.next
+dist
+**/dist
+*.tsbuildinfo
+**/*.tsbuildinfo
+.turbo
+**/.turbo
+
+# Not needed at runtime, and copying .git bloats the image with full history.
+.git
+.github
+.gitignore
+docs
+e2e-results
+playwright-report
+test-results
+**/__tests__
+**/e2e
+*.md
+!README.md
