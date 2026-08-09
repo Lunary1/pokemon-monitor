@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 const NAV_LINKS = [
   { href: '/products', label: 'Products' },
   { href: '/events', label: 'Events' },
+  { href: '/logs', label: 'Logs' },
   { href: '/settings', label: 'Settings' },
 ];
 

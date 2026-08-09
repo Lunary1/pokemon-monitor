@@ -31,6 +31,25 @@ async function main() {
       availability: 'In stock',
     },
   });
+
+  // Two sources and two levels so the log viewer's filters have something
+  // real to filter (#36). Recreated each run so counts stay predictable.
+  await prisma.errorLog.deleteMany({ where: { source: { in: ['e2e:adapter', 'e2e:notification'] } } });
+  await prisma.errorLog.createMany({
+    data: [
+      {
+        source: 'e2e:adapter',
+        level: 'ERROR',
+        message: 'E2E adapter parse failure',
+        context: { adapterKey: 'e2e' },
+      },
+      {
+        source: 'e2e:notification',
+        level: 'WARN',
+        message: 'E2E notification retry',
+      },
+    ],
+  });
 }
 
 main()

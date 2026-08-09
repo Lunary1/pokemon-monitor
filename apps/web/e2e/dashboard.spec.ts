@@ -54,6 +54,37 @@ test('user can open a product detail page and see its check history', async ({ p
   await expect(page).toHaveURL(/\/products$/);
 });
 
+test('user can open the log viewer and filter by level and source', async ({ page }) => {
+  await page.goto('/products');
+
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  await nav.getByRole('link', { name: 'Logs' }).click();
+  await expect(page).toHaveURL(/\/logs$/);
+  await expect(page.getByRole('heading', { name: 'Logs' })).toBeVisible();
+
+  // The seed writes one ERROR and one WARN across two distinct sources.
+  await expect(page.getByTestId('log-row').filter({ hasText: 'E2E adapter parse failure' })).toBeVisible();
+  await expect(page.getByTestId('log-row').filter({ hasText: 'E2E notification retry' })).toBeVisible();
+
+  // Filtering by level narrows to the matching row and drops the other.
+  await page.getByRole('link', { name: 'WARN', exact: true }).click();
+  await expect(page).toHaveURL(/level=WARN/);
+  await expect(page.getByTestId('log-row').filter({ hasText: 'E2E notification retry' })).toBeVisible();
+  await expect(page.getByTestId('log-row').filter({ hasText: 'E2E adapter parse failure' })).toHaveCount(0);
+
+  // The source filter still offers every source while a level filter is on —
+  // the list is deliberately not narrowed by the active filter, so the source
+  // that has no WARN rows must still be reachable.
+  await expect(page.getByRole('link', { name: 'e2e:adapter', exact: true })).toBeVisible();
+
+  // Clearing the level and filtering by source shows only that source's row.
+  await page.getByRole('link', { name: 'e2e:adapter', exact: true }).click();
+  await expect(page).toHaveURL(/source=e2e%3Aadapter/);
+  await page.getByRole('link', { name: 'All', exact: true }).first().click();
+  await expect(page.getByTestId('log-row').filter({ hasText: 'E2E adapter parse failure' })).toBeVisible();
+  await expect(page.getByTestId('log-row').filter({ hasText: 'E2E notification retry' })).toHaveCount(0);
+});
+
 test('does not show the notification failure banner when deliveries are healthy', async ({
   page,
 }) => {
