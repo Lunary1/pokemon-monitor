@@ -3,6 +3,7 @@ import {
   isErrorResult,
   isUrlAllowed,
   logger,
+  recordErrorLog,
   throttleDomain,
 } from '@pokemon-monitor/core';
 import { prisma, type StockEvent } from '@pokemon-monitor/db';
@@ -34,6 +35,11 @@ export async function runCheckCycle(
         { storeKey: store.key, adapterKey: store.adapterKey },
         'no adapter registered for store, skipping',
       );
+      await recordErrorLog({
+        source: 'worker',
+        message: `no adapter registered for key: ${store.adapterKey}`,
+        context: { storeKey: store.key, adapterKey: store.adapterKey },
+      });
       continue;
     }
 
@@ -94,6 +100,11 @@ export async function runCheckCycle(
           { productId: product.id, availability: result.availability },
           'adapter returned error result, skipping transition check',
         );
+        await recordErrorLog({
+          source: `adapter:${store.adapterKey}`,
+          message: result.availability ?? 'adapter returned an error result',
+          context: { productId: product.id, storeKey: store.key, url: product.url },
+        });
         continue;
       }
 

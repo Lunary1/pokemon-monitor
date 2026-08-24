@@ -1,4 +1,4 @@
-import { logger } from '@pokemon-monitor/core';
+import { logger, recordErrorLog } from '@pokemon-monitor/core';
 import { dispatch } from '@pokemon-monitor/notifications';
 import cron from 'node-cron';
 import { runCheckCycle } from './loop';
@@ -21,8 +21,13 @@ cron.schedule(TICK_SCHEDULE, () => {
       await dispatch(event);
     },
   })
-    .catch((err) => {
+    .catch(async (err) => {
       logger.error({ err }, 'check cycle failed');
+      await recordErrorLog({
+        source: 'worker',
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? (err.stack ?? null) : null,
+      });
     })
     .finally(() => {
       running = false;
