@@ -1,7 +1,14 @@
-import { logger, recordErrorLog } from '@pokemon-monitor/core';
+import { assertRequiredEnv, logger, recordErrorLog } from '@pokemon-monitor/core';
 import { dispatch } from '@pokemon-monitor/notifications';
 import cron from 'node-cron';
 import { runCheckCycle } from './loop';
+
+try {
+  assertRequiredEnv(['DATABASE_URL']);
+} catch (err) {
+  logger.fatal({ err }, 'monitor worker cannot start');
+  process.exit(1);
+}
 
 const TICK_SCHEDULE = '* * * * *'; // every minute; per-product cadence is DB-driven via Store.pollingInterval
 
