@@ -1,4 +1,5 @@
 export { logger } from './logger';
+export { assertRequiredEnv } from './env';
 export { throttleDomain, resetThrottleState } from './throttle';
 export { isErrorResult, detectTransition } from './transitions';
 export { recordErrorLog } from './errorLog';
