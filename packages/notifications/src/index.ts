@@ -1,4 +1,4 @@
-import { logger } from '@pokemon-monitor/core';
+import { logger, recordErrorLog } from '@pokemon-monitor/core';
 import { prisma, type StockEvent, type StockEventType } from '@pokemon-monitor/db';
 import { sendDiscordWebhook, type DiscordPayload } from './discord';
 import {
@@ -76,6 +76,12 @@ export async function dispatch(event: StockEvent): Promise<DispatchResult> {
       { err, eventId: event.id, productId: event.productId },
       'notification dispatch failed unexpectedly',
     );
+    await recordErrorLog({
+      source: ERROR_LOG_SOURCE,
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? (err.stack ?? null) : null,
+      context: { eventId: event.id, productId: event.productId },
+    });
     return { outcome: 'FAILED', reason: 'unexpected dispatch error' };
   }
 }
@@ -153,10 +159,10 @@ async function runDispatch(event: StockEvent): Promise<DispatchResult> {
       },
     });
 
-    await recordErrorLog(errorMessage, {
-      eventId: event.id,
-      productId: event.productId,
-      channel: 'DISCORD',
+    await recordErrorLog({
+      source: ERROR_LOG_SOURCE,
+      message: errorMessage,
+      context: { eventId: event.id, productId: event.productId, channel: 'DISCORD' },
     });
 
     logger.warn(
@@ -182,29 +188,6 @@ async function runDispatch(event: StockEvent): Promise<DispatchResult> {
     'notification sent',
   );
   return { outcome: 'SENT' };
-}
-
-/**
- * Mirror a delivery failure into ErrorLog so it surfaces in the dashboard log
- * viewer, rather than sitting in a Notification row nobody is watching.
- *
- * Deliberately swallows its own failure: dispatch() must not throw (see #6),
- * and it would be perverse for the error *reporting* path to be what takes
- * down the worker's check cycle.
- */
-async function recordErrorLog(message: string, context: Record<string, unknown>): Promise<void> {
-  try {
-    await prisma.errorLog.create({
-      data: {
-        source: ERROR_LOG_SOURCE,
-        level: 'ERROR',
-        message,
-        context: context as object,
-      },
-    });
-  } catch (err) {
-    logger.error({ err, context }, 'failed to write notification failure to ErrorLog');
-  }
 }
 
 async function recordSkipped(
