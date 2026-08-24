@@ -45,9 +45,6 @@
 ### MVP Exclusions
 
 - User authentication / multi-user support
-- Playwright checkout automation
-- Proxy rotation
-- CAPTCHA solving
 - Mobile push notifications
 - Price comparison between stores
 - Wish list or "watch list" per user
@@ -912,10 +909,6 @@ pokemon-monitor/
 | Prefilling a checkout form from saved config | ✅ | No auto-submit |
 | Scraping a page that requires JavaScript rendering | ✅ | When `got` + `cheerio` won't work |
 | Testing your own Next.js dashboard | ✅ | E2E tests, standard practice |
-| CAPTCHA solving or bypass | ❌ | Not ethical, not implemented |
-| Stealth / fingerprint spoofing plugins | ❌ | Not implemented |
-| Automated checkout (add to cart + pay) | ❌ | Out of scope |
-| Proxy rotation | ❌ | Not needed, not implemented |
 
 ### Safe Helper Flow: Open Product Page
 
@@ -1343,8 +1336,6 @@ Railway Pro plan includes automated backups. For Hobby: run a weekly `pg_dump` s
 |---|---|---|---|
 | Store changes HTML layout | High | Medium | CSS selectors isolated per adapter; snapshot fixtures catch breaks; monitor adapter error count |
 | False positives (fake restock) | Medium | Low | Require 2 consecutive in-stock results; debounce notifications |
-| Rate limiting / IP ban | Low | Medium | Respect robots.txt; use reasonable polling intervals; per-domain throttle; back off on 429 |
-| Legal / ToS concerns | Low | Medium | Personal use only; respect robots.txt; no automated checkout; low request volume |
 | Notification spam | Medium | Low | Cooldown per product; deduplication; global disable toggle |
 | Checkout flow fragility | High (if built) | Low | Keep checkout helper as manual-trigger only; it's an assistant, not an automator |
 | Overengineering | High | High | MVP first; no plugin marketplace, no multi-user, no real-time WebSockets until you actually need them |
@@ -1385,11 +1376,6 @@ Railway Pro plan includes automated backups. For Hobby: run a weekly `pg_dump` s
 
 ### Won't-Have
 
-- Automated add-to-cart or checkout
-- CAPTCHA solving
-- Proxy rotation or stealth plugins
-- Multi-user accounts
-- Public API or SaaS mode
 - Mobile app
 - Browser extension
 

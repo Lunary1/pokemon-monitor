@@ -36,5 +36,4 @@ server components, and scripts, never from a `"use client"` component.
 
 ## Intended Use
 
-This is for personal monitoring only. It should respect store rate limits,
-robots.txt, and avoid automated checkout or CAPTCHA bypass workflows.
+This is for personal monitoring only.

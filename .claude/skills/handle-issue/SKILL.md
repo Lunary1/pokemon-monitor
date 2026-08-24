@@ -28,9 +28,8 @@ Drive a GitHub issue through this repo's SDLC (`docs/SDLC.md`) end to end: valid
 Per SDLC §2/§11: no issue proceeds without a size label (`size/xs|s|m|l`) **and** a MoSCoW label (`must-have|should-have|could-have`).
 
 1. Missing either label → infer from issue body + the plan doc (`pokemon-monitor-plan---*.md`), state reasoning in 1-2 sentences, apply via `gh issue edit <N> --add-label "size/x,tier"`. Never proceed unlabeled.
-2. Check against the plan's exclusion lists (plan §1, §16, closing section: auth, multi-user, checkout automation, proxy rotation, CAPTCHA bypass, stealth plugins, a queue/plugin-marketplace before it's needed, WebSockets). Issue asks for one → stop, get an explicit written override from the user.
-3. Vague issue ("improve the dashboard") → tighten into a 3-5 line problem statement; post as an issue comment if you materially reinterpreted the ask.
-4. No issue yet → `gh issue create`, sized/labeled per above, before writing code.
+2. Vague issue ("improve the dashboard") → tighten into a 3-5 line problem statement; post as an issue comment if you materially reinterpreted the ask.
+3. No issue yet → `gh issue create`, sized/labeled per above, before writing code.
 
 ## Phase 1 — Design gate
 

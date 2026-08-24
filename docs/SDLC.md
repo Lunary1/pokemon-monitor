@@ -48,7 +48,7 @@ The **hotfix path** is a compressed version of the same loop for production-brea
 | **Deliverables** | Feature brief (GitHub issue using the Feature template) |
 | **Exit criteria** | Issue has a clear problem statement, a size, a MoSCoW tag, and — if size ≥ M — an explicit "why now" |
 | **Common failure modes** | Silent scope growth ("while I'm in there..."); building infrastructure (queues, plugin systems, auth) before it's needed; skipping this phase for "small" changes that turn out not to be |
-| **Quality gate** | **No issue moves to Design/Build without a size label and a MoSCoW label.** Anything touching auth, multi-user, checkout automation, or proxy rotation is auto-rejected per plan §1 "What Makes It Too Complex" unless the user explicitly overrides in writing |
+| **Quality gate** | **No issue moves to Design/Build without a size label and a MoSCoW label.**
 
 ### Phase 1 — Architecture and Design
 
@@ -59,7 +59,6 @@ The **hotfix path** is a compressed version of the same loop for production-brea
 | **Activities** | For new adapters: confirm data source (JSON API > embedded JSON > HTML scraping, per plan §5 "Using APIs When Available") and note selectors/endpoints. For schema changes: draft the Prisma model delta and migration approach. For API changes: note the route, request/response shape, and consumers |
 | **Deliverables** | Design note (a comment on the issue, or a short section in the PR description — not a separate doc unless the change spans ≥3 packages) |
 | **Exit criteria** | Any DB migration has a stated rollback approach; any new adapter states which data source tier it uses and why; any new external dependency is justified |
-| **Common failure modes** | Reaching for Playwright when `got` + `cheerio` (or a JSON endpoint) would work (plan §10 explicitly limits Playwright to a fallback); designing a "generic plugin system" for what is currently 2–3 adapters |
 | **Quality gate** | Design note exists in the issue/PR **before** the first line of implementation code for anything M/L sized |
 
 ### Phase 2 — Implementation
@@ -288,8 +287,6 @@ Scoped appropriately for a personal-use tool — no SOC2 theater, but the real r
 | robots.txt / ToS compliance | Already specified in plan §5 — enforce it as a **quality gate**, not just a feature: no adapter merges without respecting `robots.txt` unless `ignoreRobotsTxt` is explicitly and knowingly set per-store | This is the project's actual legal/ethical risk surface (plan §15: "Legal / ToS concerns") |
 | Rate limiting / good citizenship | Per-domain `minIntervalMs` throttle (plan §5) is a merge-blocking requirement for any new adapter, not optional | Prevents accidental DoS-like behavior against small stores; protects the project's own IP from bans |
 | Least privilege | Worker process only needs DB write access to its own tables; no adapter code should ever need filesystem or shell access beyond what `playwright-helper` explicitly requires | Contains blast radius of a compromised dependency in `store-adapters` |
-| Playwright safety | Enforced by the allow/deny table already in plan §10: no CAPTCHA bypass, no stealth plugins, no auto-submit, no proxy rotation. Treat these as **hard-coded product constraints**, checked in code review, not just documented intent | This is the line between "personal monitoring tool" and something legally and ethically different |
-| PII | Checkout prefill config (name, address, email) stays in a local, gitignored config file — never in the database, never logged | The one place real personal data touches this system; keep it out of `StockCheck`/`ErrorLog` |
 | Access control | None needed (plan explicitly excludes auth for MVP) — but if the dashboard is ever deployed publicly reachable, it must go behind at minimum a basic auth proxy or IP allowlist before that happens | The plan assumes a private deployment; don't accidentally expose product-tracking data or the manual-check endpoint publicly |
 
 ---
@@ -484,7 +481,7 @@ Stated explicitly since the source plan doesn't resolve these:
 
 ---
 
-## Top 10 SDLC Rules
+## Top 9 SDLC Rules
 
 1. **No code without a scoped issue.** Size it, tag it MoSCoW, check it against the exclusion list before writing a line.
 2. **Design on paper before code, but only when it's worth it** — M/L changes, schema changes, new adapters, new routes. Don't design a one-line selector fix.
@@ -494,5 +491,4 @@ Stated explicitly since the source plan doesn't resolve these:
 6. **Nothing deploys to production except from `main`, and every deploy is verified within 5 minutes** (health check, one worker cycle, one test notification).
 7. **The moment something breaks, it gets logged** — `ErrorLog`, an issue, or both. If it caused a missed restock or an hour of downtime, it gets a postmortem.
 8. **Respect `robots.txt` and per-domain throttling as a merge gate, not a suggestion** — it's the project's actual legal and ethical boundary.
-9. **Say no to complexity the plan already said no to** — no auth, no plugin system, no queue, no proxy rotation, no automated checkout — until there's concrete evidence the simple version is failing.
-10. **Review weekly, however briefly.** A 15-minute look at open issues, the risk register, and anything that broke is what keeps a solo project from quietly drifting into chaos.
+9. **Review weekly, however briefly.** A 15-minute look at open issues, the risk register, and anything that broke is what keeps a solo project from quietly drifting into chaos.
