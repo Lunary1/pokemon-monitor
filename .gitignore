@@ -39,6 +39,7 @@ Thumbs.db
 # Prisma
 packages/db/prisma/dev.db
 packages/db/prisma/dev.db-journal
+packages/db/generated/
 
 # Playwright
 test-results/
