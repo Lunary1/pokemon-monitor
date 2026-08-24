@@ -1,143 +1,115 @@
 ---
 name: handle-issue
-description: Use when picking up a GitHub issue on this repo to implement, fix, or close it — takes an issue number (or a description to find/create one) and drives it through the full SDLC phase model in docs/SDLC.md, from scope validation through a PR-ready branch. Trigger phrases: "work on issue #N", "handle issue #N", "pick up #N", "let's do the next issue", "implement issue N".
+description: Use when picking up a GitHub issue on this repo to implement, fix, or close it — takes an issue number (or a description to find/create one) and drives it through the SDLC phase model in docs/SDLC.md, from scope validation to a PR-ready branch. Trigger phrases: "work on issue #N", "handle issue #N", "pick up #N", "let's do the next issue", "implement issue N".
 ---
 
 # Handle Issue
 
-Drive a single GitHub issue through this repo's SDLC (`docs/SDLC.md`) end to end: validate it's actually ready to build, design it on paper if it needs that, implement the smallest correct change, test it proportional to risk, and hand back a PR that satisfies the Definition of Done — without skipping a gate and without gold-plating past what the issue asked for.
+Drive a GitHub issue through this repo's SDLC (`docs/SDLC.md`) end to end: validate scope, design on paper if needed, implement the smallest correct change, test proportional to risk, open a PR meeting the Definition of Done.
 
-This skill is the operational twin of `docs/SDLC.md`. That doc is the reference; this skill is the checklist you actually execute. If the two ever disagree, `docs/SDLC.md` wins — re-read it and follow it, and flag the mismatch to the user instead of silently picking one.
+`docs/SDLC.md` is authoritative. If this skill and that doc ever disagree, re-read the doc, follow it, and flag the mismatch to the user.
+
+## Efficiency
+
+- Don't `Read` `docs/SDLC.md` or the plan doc in full each phase — `Grep` for the section named in that phase (e.g. "§5" or "Won't-Have") and read only that excerpt. Full read at most once per issue, if genuinely needed.
+- Don't spawn `Agent`/`Explore` subagents for XS/S issues — direct `Grep`/`Read`/`Edit` is cheaper than cold-starting another context.
+- Batch independent read-only calls (issue fetch, `git status`, `git branch --show-current`, label check) into one parallel round instead of sequential turns.
+- Status updates to the user: one line per phase transition. Don't restate the checklist verbatim — report deltas and failures only.
+- Never paste full diffs, fixture HTML, or file contents into chat — reference `file:line` instead.
 
 ## Inputs
 
-The user gives you one of:
+- Issue number (`#N`) — fetch first: `gh issue view <N> --repo <owner>/<repo> --json number,title,body,labels,milestone,state,assignees`. Closed issue → stop, tell the user.
+- Description, no issue yet → create one (Phase 0) before continuing.
+- "Next issue" → list open issues in the earliest open milestone, ask which (or take lowest-numbered if told to just pick).
 
-- An issue number (`#N` or `N`) — the common case.
-- A description of work with no issue yet — create the issue first (Phase 0 below), then continue.
-- "Next issue" / "what's up next" — list open issues in the earliest open milestone, ask which one (or take the lowest-numbered one if the user says to just pick).
+## Phase 0 — Scope gate
 
-Fetch the issue before doing anything else:
+Per SDLC §2/§11: no issue proceeds without a size label (`size/xs|s|m|l`) **and** a MoSCoW label (`must-have|should-have|could-have`).
 
-```
-gh issue view <N> --repo <owner>/<repo> --json number,title,body,labels,milestone,state,assignees
-```
+1. Missing either label → infer from issue body + the plan doc (`pokemon-monitor-plan---*.md`), state reasoning in 1-2 sentences, apply via `gh issue edit <N> --add-label "size/x,tier"`. Never proceed unlabeled.
+2. Check against the plan's exclusion lists (plan §1, §16, closing section: auth, multi-user, checkout automation, proxy rotation, CAPTCHA bypass, stealth plugins, a queue/plugin-marketplace before it's needed, WebSockets). Issue asks for one → stop, get an explicit written override from the user.
+3. Vague issue ("improve the dashboard") → tighten into a 3-5 line problem statement; post as an issue comment if you materially reinterpreted the ask.
+4. No issue yet → `gh issue create`, sized/labeled per above, before writing code.
 
-If the issue is already closed, stop and tell the user — don't silently reopen or redo closed work.
+## Phase 1 — Design gate
 
-## Phase 0 — Discovery and Scope Control (gate: size + MoSCoW label present)
+Required for M/L work, any new adapter, any schema change, any new API route. Skip entirely for XS/S changes outside those. Post the result as an issue comment before writing code:
 
-Per `docs/SDLC.md` §2 Phase 0 and §11 "Change eligibility": **no issue proceeds to Design/Build without a size label (`size/xs|s|m|l`) and a MoSCoW label (`must-have|should-have|could-have`).**
-
-1. Check the issue's labels for both. If either is missing:
-   - Infer a size and MoSCoW tier yourself from the issue body and the project plan (`pokemon-monitor-plan---*.md`), state your reasoning to the user in one or two sentences, and apply the labels with `gh issue edit <N> --add-label "size/x,tier"`.
-   - Do not silently proceed without labels — this is a hard gate, not a formality.
-2. Check the issue against the plan's exclusion lists (plan §1 "What Makes It Too Complex", plan §16 "Won't-Have", plan closing section "What to Avoid Building Early": auth, multi-user, checkout automation, proxy rotation, CAPTCHA bypass, stealth plugins, a queue before it's needed, a plugin/adapter marketplace, real-time WebSockets). If the issue asks for any of these, **stop and ask the user** to confirm they want an explicit, written override — don't implement it quietly, and don't refuse silently either.
-3. If the issue as written is vague ("improve the dashboard"), tighten it into a 3–5 line problem statement before continuing. Post it as an issue comment if you had to materially reinterpret the ask, so there's a record.
-4. If no GitHub issue exists yet (user gave you a raw description), create one now with `gh issue create`, sized and labeled per the above, before writing any code.
-
-## Phase 1 — Architecture and Design (gate: design note exists for M/L work)
-
-Per `docs/SDLC.md` §2 Phase 1: required for anything M/L sized, any new adapter, any schema change, any new API route. Skip this phase entirely for XS/S changes that don't touch those — don't manufacture a design note for a one-line selector fix.
-
-When required, work out and state (as an issue comment, not a separate file) before writing code:
-
-- **New adapter:** which data-source tier applies, in priority order per plan §5 "Using APIs When Available" — Shopify `/products/{handle}.json` or similar JSON endpoint > embedded `__NEXT_DATA__`/JSON-LD > HTML scraping with `got`+`cheerio` > Playwright only as a last resort (plan §10 explicitly limits Playwright to a fallback). State which tier you're using and why the higher tiers don't apply.
-- **Schema change:** draft the Prisma model delta, and state whether it's additive/backward-compatible or destructive. If destructive (drops/renames a column or table, narrows a type), you need a rollback script sketched now — this blocks merge later per §8, so don't discover it at PR time.
-- **New API route:** note the route, request/response shape, and what currently consumes it.
-- **Anything else M/L:** a short paragraph on the approach and the main alternative you're not taking, and why.
-
-Watch for the two failure modes named in the doc: reaching for Playwright when `got`+`cheerio` would work, and designing a generic/plugin system for what's currently 2-3 concrete cases. If your design is trending toward either, stop and simplify before continuing.
+- **New adapter:** pick the highest-priority tier that fits (plan §5): Shopify/JSON endpoint > embedded `__NEXT_DATA__`/JSON-LD > HTML via `got`+`cheerio` > Playwright (last resort, plan §10). State the tier and why higher ones don't apply.
+- **Schema change:** Prisma model delta; additive or destructive. Destructive → sketch a rollback now (blocks merge at §8 otherwise).
+- **New API route:** route, request/response shape, current consumers.
+- **Other M/L:** short paragraph on the approach and the rejected alternative.
 
 ## Phase 2 — Implementation
 
-1. Confirm you're not on `main` or `develop` directly — check `git status` / `git branch --show-current`. If you are, branch first:
-   - `feat/<scope>-<short-desc>` for features, `fix/<scope>-<short-desc>` for bugs, `chore/<scope>-<short-desc>` for process/tooling — branched from `develop` (or from `main` only for a true hotfix, see below). Scope matches the existing package naming (`adapters`, `worker`, `notifications`, `db`, `web`, `core`).
-   - If mid-conversation the user already has uncommitted work on the current branch that isn't related to this issue, stop and ask before branching away from it — don't strand their work.
-2. Implement the smallest change that satisfies the (possibly-tightened) issue, following the constraints already established in this codebase and restated in `docs/SDLC.md` §2 Phase 2 / plan §9 "Maintainability Guidelines":
-   - Adapters never import from `packages/db`. They return data; callers persist it.
-   - Adapters never throw from `checkProduct()` — always return a `StockResult`, using an error/`ERROR:`-prefixed availability string for failures.
+1. Never work directly on `main`/`develop` — check `git branch --show-current` first. Branch `feat|fix|chore/<scope>-<short-desc>` from `develop` (`main` only for a hotfix, see below); scope matches existing packages (`adapters`, `worker`, `notifications`, `db`, `web`, `core`). Unrelated uncommitted work already on the current branch → ask before branching away.
+2. Constraints (SDLC §2 Phase 2 / plan §9):
+   - Adapters never import `packages/db` — they return data, callers persist it.
+   - Adapters never throw from `checkProduct()` — always return a `StockResult`, errors as an `ERROR:`-prefixed availability string.
    - Selector strings live in a `SELECTORS` constant at the top of the adapter file.
-   - No hardcoded polling intervals — read from `Store.pollingInterval`.
-   - Respect `robots.txt` and the per-domain `minIntervalMs` throttle for any adapter touching a new domain — this is a merge gate per `docs/SDLC.md` §7, not optional.
-3. Commit in small, logically atomic units using Conventional Commits, matching the existing repo history exactly: `type(scope): description`, referencing the issue number, e.g. `feat(adapters): add WooCommerce adapter (#N)`. Types: `feat`, `fix`, `test`, `chore`, `refactor`, `docs`.
-4. Update `.env.example` in the same set of commits if you introduced a new environment variable. This is a named gate in `docs/SDLC.md` §8 and §11 — don't defer it.
-5. Don't add abstractions, config options, or generality the issue didn't ask for. A bug fix doesn't need a refactor riding along with it.
+   - No hardcoded polling intervals — read `Store.pollingInterval`.
+   - New domain → respect `robots.txt` and the per-domain `minIntervalMs` throttle (merge gate, SDLC §7).
+3. Commit in small atomic units, Conventional Commits matching repo history: `type(scope): description (#N)`. Types: `feat|fix|test|chore|refactor|docs`.
+4. New env var → update `.env.example` in the same commits (SDLC §8/§11 gate).
+5. No abstractions, config, or generality beyond what the issue asked for.
 
-## Phase 3 — Verification and Testing (gate: tests proportional to risk, mandatory for adapters)
+## Phase 3 — Testing (mandatory for adapters)
 
-Per `docs/SDLC.md` §6, test what you touched, weighted by what's actually risky here — not by chasing coverage:
+Per SDLC §6, proportional to risk:
 
-| You changed                                | You must add/update                                                                                                                                                                                                                          |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A `StoreAdapter` implementation            | An in-stock fixture test, an out-of-stock fixture test, **and** a network-error test asserting `checkProduct` returns an error result rather than throwing. No exceptions — this is the single hard-required test gate in the whole project. |
-| Store HTML changed under you               | Refresh the fixture HTML from the live page, update selectors, keep the old fixture under a `legacy/` note per plan §13 "Regression Tests".                                                                                                  |
-| Transition/debounce/cooldown/backoff logic | A unit test covering the specific transition or edge case (e.g. flapping avoidance, cooldown window boundary).                                                                                                                               |
-| An API route under `apps/web/app/api/**`   | An integration test hitting the route against a test DB, asserting the persisted row/response shape.                                                                                                                                         |
-| Dashboard UI                               | A Playwright E2E check only if this is release-bound work; not required per-PR unless the PR is UI-only.                                                                                                                                     |
+| Changed | Required |
+|---|---|
+| `StoreAdapter` impl | in-stock fixture test + out-of-stock fixture test + network-error test asserting `checkProduct` returns an error result, never throws. Hard-required, no exceptions. |
+| Store HTML changed | refresh fixture HTML, update selectors, keep old fixture under a `legacy/` note (plan §13) |
+| Transition/debounce/cooldown/backoff logic | unit test for the specific edge case (e.g. flapping, cooldown boundary) |
+| API route under `apps/web/app/api/**` | integration test against a test DB, assert persisted row/response shape |
+| Dashboard UI | Playwright E2E only if release-bound; not required per-PR unless UI-only |
 
-Run the full local check before considering this phase done:
+Before calling this phase done, run and confirm clean: `npm run typecheck && npm run build && npm run test` — this is CI until issue #7 lands.
 
-```
-npm run typecheck && npm run build && npm run test
-```
+## Phase 4 — PR
 
-All three must be clean. This mirrors the CI gate defined in `docs/SDLC.md` §8 assumption #2 (issue #7, "add GitHub Actions workflow") — until that workflow exists, you are the CI. Don't skip steps because "it's just a small change."
-
-## Phase 4 — Release Preparation / PR
-
-Open the PR (don't merge it yourself — merge is the user's call per this repo's `git` safety norms) with a description built from the template in `docs/SDLC.md` §5:
+Template (SDLC §5):
 
 ```markdown
 ## What
-
 ## Why
-
 ## Design note
-
-(paste Phase 1 output here if it applied; omit the section entirely if it didn't)
-
+(paste Phase 1 output if it applied; omit otherwise)
 ## Testing
-
 - [ ] Unit tests added/updated
 - [ ] Fixtures added/updated (adapter changes only)
 - [ ] Manually verified locally
-
 ## Migration plan
-
-(schema changes only — omit otherwise)
-
+(schema changes only)
 ## Rollback plan
-
-(schema or worker/web contract changes only — omit otherwise)
+(schema or worker/web contract changes only)
 ```
 
-Before opening it, run the Definition of Done from `docs/SDLC.md` §11 as a literal checklist against your own diff:
+Definition of Done (SDLC §11) — check against your own diff before opening the PR, fix gaps rather than noting them:
 
 - [ ] Tests added/updated and passing
-- [ ] `.env.example` updated if new env vars were introduced
-- [ ] No new secrets in the diff (scan your own changes — check for anything that looks like a token, key, or webhook URL before staging)
-- [ ] Adapter changes: fixtures updated, respects `robots.txt` and `minIntervalMs`
-- [ ] Schema changes: migration tested locally against a test DB, rollback plan documented in the PR
-- [ ] PR references the issue (`Closes #N` or `Refs #N` — use `Closes` only if this PR fully resolves it)
+- [ ] `.env.example` updated if new env vars introduced
+- [ ] No new secrets in the diff
+- [ ] Adapter changes: fixtures updated, respects `robots.txt`/`minIntervalMs`
+- [ ] Schema changes: migration tested locally, rollback plan in the PR
+- [ ] PR references the issue (`Closes #N` only if fully resolved, else `Refs #N`)
 
-If any box can't be checked honestly, fix it before opening the PR rather than opening it and noting the gap — the gate exists to be met, not narrated.
-
-Push the branch and open the PR with `gh pr create`, base `develop` (or `main` for a hotfix — see below). Report back to the user with the PR URL and a one-line summary of what's still open (e.g., "needs a review pass on the migration" or "ready to merge").
+`gh pr create`, base `develop` (`main` for a hotfix). Report the PR URL and a one-line status to the user. Never merge, push to `main`/`develop`, or force-push — merging is the user's call.
 
 ## Hotfix shortcut
 
-If the user frames this as a live production issue (worker down, notification storm, adapter silently broken in prod) rather than routine backlog work, use the compressed path from `docs/SDLC.md` §5 "Hotfix / urgent production issue flow" instead of the full phase sequence:
+Live production issue (worker down, notification storm, adapter broken in prod) → compressed path (SDLC §5):
 
-1. Confirm it's real first — check `/api/health`, `ErrorLog`, recent `StockCheck` rows. Don't assume code is at fault before checking whether it's the target store's site instead.
-2. Branch `hotfix/<slug>` from `main`, not `develop`.
-3. Fix plus the minimal regression test that would have caught it — skip Phase 0/1 ceremony, a one-line problem statement in the PR is enough.
-4. PR base is `main`; note in the PR body that it also needs merging back into `develop` after.
-5. Tell the user a postmortem is warranted within 24-48h if this caused a missed restock or >1h of downtime (`docs/SDLC.md` §4 postmortem template) — don't write the postmortem yourself unless asked, just flag that the bar was met.
+1. Confirm it's real: check `/api/health`, `ErrorLog`, recent `StockCheck` rows — could be the target site, not your code.
+2. Branch `hotfix/<slug>` from `main`.
+3. Fix + minimal regression test; skip Phase 0/1 ceremony, a one-line problem statement in the PR is enough.
+4. PR base `main`; note it also needs merging back into `develop`.
+5. Flag (don't write) postmortem need if this caused a missed restock or >1h downtime (SDLC §4 template).
 
-## Guardrails throughout
+## Guardrails
 
-- Never merge, never push directly to `main` or `develop`, never force-push — open a PR and stop. Merging is the user's call every time, matching this repo's existing git safety norms.
-- If mid-implementation you discover the issue is actually larger than its size label suggests (an S turns out to need a schema change), stop, say so, and re-label it rather than quietly finishing an L-sized change under an S label.
-- If you hit a design decision the issue doesn't resolve and the plan doesn't cover, ask the user — don't guess silently on anything that affects scope, schema, or the adapter allow-list in plan §10.
-- One issue, one branch, one PR. Don't bundle unrelated fixes into the same branch because you noticed them along the way — log them as new issues instead (tag `tech-debt` if it's cleanup, not a bug).
+- Mid-implementation the issue turns out bigger than its label (S needs a schema change) → stop, say so, re-label rather than finishing quietly under the old label.
+- A scope/schema/adapter-allow-list decision the issue and plan don't resolve → ask, don't guess.
+- One issue, one branch, one PR — unrelated fixes noticed along the way become new issues (`tech-debt` label if cleanup, not a bug).
