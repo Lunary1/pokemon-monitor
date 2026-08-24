@@ -10,6 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # prisma.config.ts resolves DATABASE_URL eagerly for every CLI command
+      # (including `prisma generate`, run via postinstall), even though this
+      # job never connects to a database. Placeholder only, never a real URL.
+      DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
     steps:
       - name: Checkout
         uses: actions/checkout@v4
