@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ProductListItem } from '../lib/products';
 import { CheckNowButton } from './CheckNowButton';
+import { ProductActions } from './ProductActions';
 import { StatusBadge, type StatusBadgeStatus } from './StatusBadge';
 
 function statusOf(product: ProductListItem): StatusBadgeStatus {
@@ -29,6 +30,7 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         padding: 16,
         border: '1px solid var(--color-border)',
         borderRadius: 8,
+        opacity: product.enabled ? 1 : 0.55,
       }}
     >
       <div>
@@ -38,6 +40,9 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         >
           {product.name}
         </Link>
+        {!product.enabled && (
+          <span style={{ marginLeft: 8, fontSize: 12, color: 'var(--color-muted)' }}>disabled</span>
+        )}
         <div style={{ fontSize: 13, color: 'var(--color-muted)' }}>{product.store.name}</div>
         <a
           href={product.url}
@@ -56,8 +61,21 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>
           {check ? `Checked ${new Date(check.checkedAt).toLocaleString()}` : 'Never checked'}
         </div>
-        <div style={{ marginTop: 8 }}>
-          <CheckNowButton productId={product.id} />
+        <div
+          style={{
+            marginTop: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 10,
+          }}
+        >
+          {product.enabled && <CheckNowButton productId={product.id} />}
+          <ProductActions
+            productId={product.id}
+            productName={product.name}
+            enabled={product.enabled}
+          />
         </div>
       </div>
     </div>
