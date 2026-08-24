@@ -46,3 +46,12 @@ const adapters: Record<string, StoreAdapter> = {
 export function getAdapter(key: string): StoreAdapter | undefined {
   return adapters[key];
 }
+
+/**
+ * Every key `getAdapter` resolves, for populating store-form dropdowns. Includes
+ * `toychamp`, which aliases `dreamland` (see above) — callers that surface these
+ * to a user should label it as the legacy alias it is.
+ */
+export function listAdapterKeys(): string[] {
+  return Object.keys(adapters);
+}
