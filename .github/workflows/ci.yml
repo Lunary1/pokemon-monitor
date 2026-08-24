@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -67,7 +67,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run migrations
-        run: npm run db:migrate --workspace @pokemon-monitor/db -- --skip-generate
+        run: npm run db:migrate:deploy --workspace @pokemon-monitor/db
 
       - name: Seed E2E data
         run: npm run e2e:seed --workspace @pokemon-monitor/web
