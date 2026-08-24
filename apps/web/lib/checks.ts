@@ -3,6 +3,7 @@ import {
   isErrorResult,
   isUrlAllowed,
   logger,
+  recordErrorLog,
   throttleDomain,
 } from '@pokemon-monitor/core';
 import { prisma, type StockCheck } from '@pokemon-monitor/db';
@@ -89,6 +90,11 @@ export async function runManualCheck(productId: string): Promise<StockCheck> {
       { productId: product.id, availability: result.availability },
       'manual check: adapter returned error result, skipping transition check',
     );
+    await recordErrorLog({
+      source: `adapter:${product.store.adapterKey}`,
+      message: result.availability ?? 'adapter returned an error result',
+      context: { productId: product.id, storeKey: product.store.key, url: product.url },
+    });
     return stockCheck;
   }
 
