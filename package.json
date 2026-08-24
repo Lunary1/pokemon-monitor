@@ -20,7 +20,7 @@
     "workers/*"
   ],
   "engines": {
-    "node": ">=20.11.0",
+    "node": "^20.19 || ^22.12 || >=24.0",
     "npm": ">=10.0.0"
   },
   "devDependencies": {
