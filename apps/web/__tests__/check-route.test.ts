@@ -30,11 +30,13 @@ vi.mock('@pokemon-monitor/store-adapters', async (importOriginal) => {
 });
 
 const isUrlAllowed = vi.fn();
+const recordErrorLog = vi.fn();
 
 vi.mock('@pokemon-monitor/core', () => ({
   logger: { info: vi.fn(), warn: vi.fn() },
   throttleDomain: (...args: unknown[]) => throttleDomain(...args),
   isUrlAllowed: (...args: unknown[]) => isUrlAllowed(...args),
+  recordErrorLog: (...args: unknown[]) => recordErrorLog(...args),
   isErrorResult: (availability: string | null | undefined) =>
     typeof availability === 'string' && availability.startsWith('ERROR:'),
   detectTransition: (previous: boolean | null, current: boolean) => {
@@ -155,6 +157,13 @@ describe('POST /api/products/:id/check', () => {
 
     expect(response.status).toBe(200);
     expect(createStockEvent).not.toHaveBeenCalled();
+    expect(recordErrorLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'adapter:toychamp',
+        message: 'ERROR: timeout',
+        context: { productId: 'product-1', storeKey: 'toychamp', url: product.url },
+      }),
+    );
   });
 
   test('applies per-store AdapterConfig overrides to the manual check (#30)', async () => {

@@ -18,10 +18,13 @@ vi.mock('@pokemon-monitor/db', () => ({
   },
 }));
 
+const recordErrorLog = vi.fn();
+
 vi.mock('@pokemon-monitor/core', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   throttleDomain: vi.fn().mockResolvedValue(undefined),
   isUrlAllowed: vi.fn().mockResolvedValue(true),
+  recordErrorLog: (...args: unknown[]) => recordErrorLog(...args),
   isErrorResult: (availability: string | null | undefined) =>
     typeof availability === 'string' && availability.startsWith('ERROR:'),
   detectTransition: (previous: boolean | null, current: boolean) => {
@@ -214,6 +217,35 @@ describe('runCheckCycle', () => {
 
     await expect(runCheckCycle()).resolves.not.toThrow();
     expect(checkProduct).not.toHaveBeenCalled();
+    expect(recordErrorLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'worker',
+        context: { storeKey: 'toychamp', adapterKey: 'unknown-store' },
+      }),
+    );
+  });
+
+  test('writes an ErrorLog row when the adapter returns an error result', async () => {
+    findManyStore.mockResolvedValue([{ ...baseStore, products: [baseProduct] }]);
+    findFirstStockCheck.mockResolvedValue(null);
+    checkProduct.mockResolvedValue({
+      inStock: false,
+      price: null,
+      currency: 'EUR',
+      availability: 'ERROR: Connection timeout',
+      checkedAt: new Date(),
+    });
+    createStockCheck.mockResolvedValue({ inStock: false, price: null });
+
+    await runCheckCycle();
+
+    expect(recordErrorLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'adapter:toychamp',
+        message: 'ERROR: Connection timeout',
+        context: { productId: 'product-1', storeKey: 'toychamp', url: baseProduct.url },
+      }),
+    );
   });
 
   test('throttles on the product host, not the adapter baseUrl', async () => {

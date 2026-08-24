@@ -4,7 +4,7 @@ const findUniqueProduct = vi.fn();
 const findFirstSetting = vi.fn();
 const findFirstNotification = vi.fn();
 const createNotification = vi.fn();
-const createErrorLog = vi.fn();
+const recordErrorLog = vi.fn();
 const sendDiscordWebhook = vi.fn();
 
 vi.mock('@pokemon-monitor/db', () => ({
@@ -15,12 +15,12 @@ vi.mock('@pokemon-monitor/db', () => ({
       findFirst: (...args: unknown[]) => findFirstNotification(...args),
       create: (...args: unknown[]) => createNotification(...args),
     },
-    errorLog: { create: (...args: unknown[]) => createErrorLog(...args) },
   },
 }));
 
 vi.mock('@pokemon-monitor/core', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  recordErrorLog: (...args: unknown[]) => recordErrorLog(...args),
 }));
 
 vi.mock('../src/discord', async () => {
@@ -76,7 +76,7 @@ beforeEach(() => {
   });
   findFirstNotification.mockResolvedValue(null);
   createNotification.mockResolvedValue({});
-  createErrorLog.mockResolvedValue({});
+  recordErrorLog.mockResolvedValue(undefined);
   sendDiscordWebhook.mockResolvedValue({ ok: true });
 });
 
@@ -260,6 +260,20 @@ describe('dispatch', () => {
     );
   });
 
+  test('mirrors an unexpected dispatch failure into ErrorLog', async () => {
+    findUniqueProduct.mockRejectedValue(new Error('connection lost'));
+
+    await dispatch(makeEvent());
+
+    expect(recordErrorLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'notification',
+        message: 'connection lost',
+        context: { eventId: 'event-1', productId: 'product-1' },
+      }),
+    );
+  });
+
   test('writes exactly one Notification row per dispatch', async () => {
     await dispatch(makeEvent());
     expect(createNotification).toHaveBeenCalledTimes(1);
@@ -272,12 +286,11 @@ describe('dispatch — surfacing failures to ErrorLog', () => {
 
     await dispatch(makeEvent());
 
-    expect(createErrorLog).toHaveBeenCalledTimes(1);
-    const data = createErrorLog.mock.calls[0][0].data;
-    expect(data.source).toBe('notification');
-    expect(data.level).toBe('ERROR');
-    expect(data.message).toContain('401');
-    expect(data.context).toEqual({
+    expect(recordErrorLog).toHaveBeenCalledTimes(1);
+    const call = recordErrorLog.mock.calls[0][0];
+    expect(call.source).toBe('notification');
+    expect(call.message).toContain('401');
+    expect(call.context).toEqual({
       eventId: 'event-1',
       productId: 'product-1',
       channel: 'DISCORD',
@@ -287,7 +300,7 @@ describe('dispatch — surfacing failures to ErrorLog', () => {
   test('does not write to ErrorLog on a successful send', async () => {
     await dispatch(makeEvent());
 
-    expect(createErrorLog).not.toHaveBeenCalled();
+    expect(recordErrorLog).not.toHaveBeenCalled();
   });
 
   test('does not write to ErrorLog when the dispatch was merely skipped', async () => {
@@ -299,19 +312,9 @@ describe('dispatch — surfacing failures to ErrorLog', () => {
 
     await dispatch(makeEvent());
 
-    expect(createErrorLog).not.toHaveBeenCalled();
+    expect(recordErrorLog).not.toHaveBeenCalled();
   });
 
-  test('still reports FAILED when the ErrorLog write itself fails', async () => {
-    // The error-reporting path must never become the thing that breaks
-    // dispatch — its no-throw contract has to hold even here.
-    sendDiscordWebhook.mockResolvedValue({ ok: false, error: 'connect ECONNREFUSED' });
-    createErrorLog.mockRejectedValue(new Error('ErrorLog table unavailable'));
-
-    const result = await dispatch(makeEvent());
-
-    expect(result.outcome).toBe('FAILED');
-    expect(createNotification).toHaveBeenCalledTimes(1);
-    expect(writtenStatus()).toBe('FAILED');
-  });
+  // recordErrorLog's own no-throw-on-failure contract is covered by
+  // packages/core/__tests__/errorLog.test.ts; dispatch() just relies on it.
 });
